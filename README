@@ -1,0 +1,13 @@
+README
+--------
+
+Moorsp - A really simple Plagiarism tool for Moodle.
+Author: Dan Marsden <dan@danmarsden.com>
+Copyright 2014 Dan Marsden http://danmarsden.com
+
+QUICK INSTALL
+================
+1) Place these files in a new folder in your Moodle install under /plagiarism/moorsp
+2) Visit the Notifications page in Moodle to trigger the upgrade scripts
+3) Enable the Plagiarism API under admin > Advanced Features
+4) Configure the Moorsp plugin under admin > plugins > Plagiarism > Moorsp
