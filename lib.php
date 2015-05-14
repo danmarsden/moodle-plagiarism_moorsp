@@ -78,6 +78,13 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         //Add elements to form using standard mform like:
         //$mform->addElement('hidden', $element);
         //$mform->disabledIf('plagiarism_draft_submit', 'var4', 'eq', 0);
+        global $DB, $PAGE, $CFG;
+        $plagiarismsettings = (array)get_config('plagiarism');
+        if(!$plagiarismsettings) {
+            return;
+        }
+
+
 
     }
 

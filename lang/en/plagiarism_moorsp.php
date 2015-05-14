@@ -29,3 +29,4 @@ $string['moorspexplain'] = 'For more information on this plugin see: ';
 $string['pluginname'] = 'Moorsp';
 $string['usemoorsp'] ='Enable Moorsp';
 $string['savedconfigsuccess'] = 'Plagiarism Settings Saved';
+$string['moorsp_enableplugin'] = 'Enable Moorsp for {$a}';

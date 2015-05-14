@@ -43,6 +43,14 @@ class plagiarism_setup_form extends moodleform {
         $mform->addHelpButton('moorsp_student_disclosure', 'studentdisclosure', 'plagiarism_moorsp');
         $mform->setDefault('moorsp_student_disclosure', get_string('studentdisclosuredefault','plagiarism_moorsp'));
 
+        $mods = core_component::get_plugin_list('mod');
+        foreach ($mods as $mod => $modname) {
+            if (plugin_supports('mod', $mod, FEATURE_PLAGIARISM)) {
+                $modstring = 'moorsp_enable_mod_' . $mod;
+                $mform->addElement('checkbox', $modstring, get_string('moorsp_enableplugin', 'plagiarism_moorsp', $mod));
+            }
+        }
+
         $this->add_action_buttons(true);
     }
 }

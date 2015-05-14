@@ -49,6 +49,18 @@ if (($data = $mform->get_data()) && confirm_sesskey()) {
     if (!isset($data->moorsp_use)) {
         $data->moorsp_use = 0;
     }
+    if (!isset($data->moorspenable_mod_assign)) {
+        $data->moorsp_enable_mod_assign = 0;
+    }
+    if (!isset($data->moorsp_enable_mod_assignment)) {
+        $data->moorsp_enable_mod_assignment = 0;
+    }
+    if (!isset($data->moorsp_enable_mod_forum)) {
+        $data->moorsp_enable_mod_forum = 0;
+    }
+    if (!isset($data->moorsp_enable_mod_workshop)) {
+        $data->moorsp_enable_mod_workshop = 0;
+    }
     foreach ($data as $field=>$value) {
         if (strpos($field, 'moorsp')===0) {
             if ($tiiconfigfield = $DB->get_record('config_plugins', array('name'=>$field, 'plugin'=>'plagiarism'))) {
