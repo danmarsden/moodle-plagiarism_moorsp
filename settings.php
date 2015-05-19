@@ -63,7 +63,8 @@ if (($data = $mform->get_data()) && confirm_sesskey()) {
     }
     foreach ($data as $field=>$value) {
         if (strpos($field, 'moorsp')===0) {
-            if ($tiiconfigfield = $DB->get_record('config_plugins', array('name'=>$field, 'plugin'=>'plagiarism'))) {
+            $plugintype = $field == 'moorsp_use' ? 'plagiarism' : 'plagiarism_moorsp';
+            if ($tiiconfigfield = $DB->get_record('config_plugins', array('name'=>$field, 'plugin'=>$plugintype))) {
                 $tiiconfigfield->value = $value;
                 if (! $DB->update_record('config_plugins', $tiiconfigfield)) {
                     error("errorupdating");
@@ -71,7 +72,7 @@ if (($data = $mform->get_data()) && confirm_sesskey()) {
             } else {
                 $tiiconfigfield = new stdClass();
                 $tiiconfigfield->value = $value;
-                $tiiconfigfield->plugin = 'plagiarism';
+                $tiiconfigfield->plugin = $plugintype;
                 $tiiconfigfield->name = $field;
                 if (! $DB->insert_record('config_plugins', $tiiconfigfield)) {
                     error("errorinserting");
