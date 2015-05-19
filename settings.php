@@ -80,9 +80,11 @@ if (($data = $mform->get_data()) && confirm_sesskey()) {
             }
         }
     }
+    cache_helper::invalidate_by_definition('core', 'config', array(), 'plagiarism_moorsp');
     echo $OUTPUT->notification(get_string('savedconfigsuccess', 'plagiarism_moorsp'), 'notifysuccess');
 }
 $plagiarismsettings = (array)get_config('plagiarism');
+array_merge($plagiarismsettings, (array)get_config('plagiarism_moorsp'));
 $mform->set_data($plagiarismsettings);
     
 echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
