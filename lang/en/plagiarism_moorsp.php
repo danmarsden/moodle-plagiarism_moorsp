@@ -30,3 +30,7 @@ $string['pluginname'] = 'Moorsp';
 $string['usemoorsp'] ='Enable Moorsp';
 $string['savedconfigsuccess'] = 'Plagiarism Settings Saved';
 $string['moorsp_enableplugin'] = 'Enable Moorsp for {$a}';
+$string['moorsp_show_student_plagiarism_info'] = 'Show plagiarism info to student';
+$string['submitondraft'] = 'Submit file when first uploaded';
+$string['submitonfinal'] = 'Submit file when student sends for marking';
+$string['moorsp_draft_submit'] = 'When should the file be analyzed by Moorsp';

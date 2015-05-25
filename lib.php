@@ -74,16 +74,75 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @param object $mform  - Moodle form
      * @param object $context - current context
      */
-    public function get_form_elements_module($mform, $context) {
+    public function get_form_elements_module($mform, $context, $modulename = "") {
         //Add elements to form using standard mform like:
         //$mform->addElement('hidden', $element);
         //$mform->disabledIf('plagiarism_draft_submit', 'var4', 'eq', 0);
         global $DB, $PAGE, $CFG;
-        $plagiarismsettings = (array)get_config('plagiarism');
+        $ynoptions = array( 0 => get_string('no'), 1 => get_string('yes'));
+        $tiioptions = array(0 => get_string("never"), 1 => get_string("always"));
+        $moorspdraftoptions = array(
+            PLAGIARISM_MOORSP_DRAFTSUBMIT_IMMEDIATE => get_string("submitondraft", "plagiarism_moorsp"),
+            PLAGIARISM_MOORSP_DRAFTSUBMIT_FINAL => get_string("submitonfinal", "plagiarism_moorsp")
+        );
+        $plagiarismsettings = array_merge((array)get_config('plagiarism'), (array)get_config('plagiarism_moorsp'));
+        print_r($plagiarismsettings);
         if(!$plagiarismsettings) {
             return;
         }
+        $cmid = optional_param('update', 0, PARAM_INT); // Get cm as $this->_cm is not available here.
+        if (!empty($modulename)) {
+            $modname = 'moorsp_enable_' . $modulename;
+            if (empty($plagiarismsettings[$modname])) {
+                return;             // Return if moorsp is not enabled for the module.
+            }
+        }
+        if (!empty($cmid)) {
+            $plagiarismvalues = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $cmid), '', 'name, value');
+        }
+        // Get Defaults - cmid(0) is the default list.
+        $plagiarismdefaults = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => 0), '', 'name, value');
+        $plagiarismelements = $this->config_options();
 
+        if (has_capability('plagiarism/moorsp:enable', $context)) {
+            $mform->addElement('header', 'plagiarismdesc', get_string('pluginname', 'plagiarism_moorsp'));
+            $mform->addElement('select', 'use_moorsp', get_string('usemoorsp', 'plagiarism_moorsp'), $ynoptions);
+            $mform->addElement('select', 'moorsp_show_student_plagiarism_info',
+                get_string("moorsp_show_student_plagiarism_info", "plagiarism_moorsp"), $tiioptions);
+            if ($mform->elementExists('var4') ||
+                $mform->elementExists('submissiondrafts')) {
+                $mform->addElement('select', 'moorsp_draft_submit',
+                    get_string("moorsp_draft_submit", "plagiarism_moorsp"), $moorspdraftoptions);
+            }
+            if ($mform->elementExists('moorsp_draft_submit')) {
+                if ($mform->elementExists('var4')) {
+                    $mform->disabledIf('moorsp_draft_submit', 'var4', 'eq', 0);
+                } else if ($mform->elementExists('submissiondrafts')) {
+                    $mform->disabledIf('moorsp_draft_submit', 'submissiondrafts', 'eq', 0);
+                }
+            }
+            // Disable all plagiarism elements if use_plagiarism eg 0.
+            foreach ($plagiarismelements as $element) {
+                if ($element <> 'use_moorsp') { // Ignore this var.
+                    $mform->disabledIf($element, 'use_moorsp', 'eq', 0);
+                }
+            }
+        } else { // Add plagiarism settings as hidden vars.
+            foreach ($plagiarismelements as $element) {
+                $mform->addElement('hidden', $element);
+                $mform->setType('use_moorsp', PARAM_INT);
+                $mform->setType('moorsp_show_student_plagiarism_info', PARAM_INT);
+                $mform->setType('moorsp_draft_submit', PARAM_INT);
+            }
+        }
+        // Now set defaults.
+        foreach ($plagiarismelements as $element) {
+            if (isset($plagiarismvalues[$element])) {
+                $mform->setDefault($element, $plagiarismvalues[$element]);
+            } else if (isset($plagiarismdefaults[$element])) {
+                $mform->setDefault($element, $plagiarismdefaults[$element]);
+            }
+        }
 
 
     }
@@ -120,6 +179,16 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      */
     public function cron() {
         //do any scheduled task stuff
+    }
+    /**
+     * Function which returns an array of all the module instance settings.
+     *
+     * @return array
+     *
+     */
+    public function config_options() {
+        return array('use_moorsp', 'moorsp_show_student_plagiarism_info',
+            'moorsp_draft_submit');
     }
 }
 
@@ -177,5 +246,7 @@ function moorsp_event_assessable_submitted($eventdata) {
     $result = true;
 
     return $result;
+
 }
+
 
