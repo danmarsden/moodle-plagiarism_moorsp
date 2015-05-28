@@ -29,7 +29,12 @@ if (!defined('MOODLE_INTERNAL')) {
 //get global class
 require_once($CFG->dirroot.'/plagiarism/lib.php');
 
-///// Turnitin Class ////////////////////////////////////////////////////
+define('PLAGIARISM_MOORSP_DRAFTSUBMIT_IMMEDIATE', 0);
+define('PLAGIARISM_MOORSP_DRAFTSUBMIT_FINAL', 1);
+
+/**
+ * Class plagiarism_plugin_moorsp
+ */
 class plagiarism_plugin_moorsp extends plagiarism_plugin {
      /**
      * hook to allow plagiarism specific information to be displayed beside a submission 
@@ -75,9 +80,6 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @param object $context - current context
      */
     public function get_form_elements_module($mform, $context, $modulename = "") {
-        //Add elements to form using standard mform like:
-        //$mform->addElement('hidden', $element);
-        //$mform->disabledIf('plagiarism_draft_submit', 'var4', 'eq', 0);
         global $DB, $PAGE, $CFG;
         $ynoptions = array( 0 => get_string('no'), 1 => get_string('yes'));
         $tiioptions = array(0 => get_string("never"), 1 => get_string("always"));
@@ -109,15 +111,12 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             $mform->addElement('select', 'use_moorsp', get_string('usemoorsp', 'plagiarism_moorsp'), $ynoptions);
             $mform->addElement('select', 'moorsp_show_student_plagiarism_info',
                 get_string("moorsp_show_student_plagiarism_info", "plagiarism_moorsp"), $tiioptions);
-            if ($mform->elementExists('var4') ||
-                $mform->elementExists('submissiondrafts')) {
+            if ($mform->elementExists('submissiondrafts')) {
                 $mform->addElement('select', 'moorsp_draft_submit',
                     get_string("moorsp_draft_submit", "plagiarism_moorsp"), $moorspdraftoptions);
             }
             if ($mform->elementExists('moorsp_draft_submit')) {
-                if ($mform->elementExists('var4')) {
-                    $mform->disabledIf('moorsp_draft_submit', 'var4', 'eq', 0);
-                } else if ($mform->elementExists('submissiondrafts')) {
+                if ($mform->elementExists('submissiondrafts')) {
                     $mform->disabledIf('moorsp_draft_submit', 'submissiondrafts', 'eq', 0);
                 }
             }
