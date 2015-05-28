@@ -88,7 +88,6 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             PLAGIARISM_MOORSP_DRAFTSUBMIT_FINAL => get_string("submitonfinal", "plagiarism_moorsp")
         );
         $plagiarismsettings = array_merge((array)get_config('plagiarism'), (array)get_config('plagiarism_moorsp'));
-        print_r($plagiarismsettings);
         if(!$plagiarismsettings) {
             return;
         }
