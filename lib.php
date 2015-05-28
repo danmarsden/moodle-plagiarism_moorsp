@@ -36,6 +36,25 @@ define('PLAGIARISM_MOORSP_DRAFTSUBMIT_FINAL', 1);
  * Class plagiarism_plugin_moorsp
  */
 class plagiarism_plugin_moorsp extends plagiarism_plugin {
+    /**
+     * This function should be used to initialise settings and check if Moorsp is enabled.
+     *
+     * @return mixed - false if not enabled, or returns an array of relevant settings.
+     */
+    static public function get_settings() {
+        static $plagiarismsettings;
+        if (!empty($plagiarismsettings) || $plagiarismsettings === false) {
+            return $plagiarismsettings;
+        }
+        $plagiarismsettings = $plagiarismsettings = array_merge((array)get_config('plagiarism'),
+            (array)get_config('plagiarism_moorsp'));
+        // Check if enabled.
+        if (isset($plagiarismsettings['moorsp_use']) && $plagiarismsettings['moorsp_use']) {
+            return $plagiarismsettings;
+        } else {
+            return false;
+        }
+    }
      /**
      * hook to allow plagiarism specific information to be displayed beside a submission 
      * @param array  $linkarraycontains all relevant information for the plugin to generate a link
@@ -66,12 +85,35 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
     public function get_file_results($cmid, $userid, $file) {
         return array('analyzed' => '', 'score' => '', 'reporturl' => '');
     }
-    /* hook to save plagiarism specific settings on a module settings page
-     * @param object $data - data from an mform submission.
-    */
-
+    /**
+     * Hook to save plagiarism specific settings on a module settings page.
+     * @param $data data from an mform submission.
+     */
     public function save_form_elements($data) {
+        global $DB;
+        if (!$this->get_settings()) {
+            return;
+        }
+        if (isset($data->use_moorsp)) {
+            // Array of possible plagiarism config options.
+            $plagiarismelements = $this->config_options();
+            // First get existing values.
+            $existingelements = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $data->coursemodule),
+                '', 'name, id');
+            foreach ($plagiarismelements as $element) {
+                $newelement = new stdClass();
+                $newelement->cm = $data->coursemodule;
+                $newelement->name = $element;
+                $newelement->value = (isset($data->$element) ? $data->$element : 0);
+                if (isset($existingelements[$element])) {
+                    $newelement->id = $existingelements[$element];
+                    $DB->update_record('plagiarism_moorsp_config', $newelement);
+                } else {
+                    $DB->insert_record('plagiarism_moorsp_config', $newelement);
+                }
 
+            }
+        }
     }
 
     /**
