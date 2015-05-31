@@ -55,6 +55,30 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             return false;
         }
     }
+
+    /**
+     * Check whether Moorsp needs to be used in a particular instance.
+     *
+     * @param array eventdata for the plagiarism event
+     * @return boolean whether Moorsp needs to be used to handle the event
+     */
+    public function is_moorsp_used($eventdata) {
+        global $DB;
+        $useforcm = false;
+        $cmenabled = false;
+        $cmid = (!empty($eventdata->cm->id)) ? $eventdata->cm->id : $eventdata->cmid;
+        $plagiarismvalues = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $cmid), '', 'name, value');
+        if ($plagiarismvalues['use_moorsp']) {
+            // Moorsp is used for this cm
+            $useforcm = true;
+        }
+
+        // Check if the module associated with this event still exists.
+        if ($DB->record_exists('course_modules', array('id' => $eventdata->cmid))) {
+            $cmenabled = true;
+        }
+        return ($useforcm && $cmenabled);
+    }
      /**
      * hook to allow plagiarism specific information to be displayed beside a submission 
      * @param array  $linkarraycontains all relevant information for the plugin to generate a link
@@ -193,9 +217,13 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @return string
      */
     public function print_disclosure($cmid) {
-        global $OUTPUT;
-        $plagiarismsettings = (array)get_config('plagiarism');
-        //TODO: check if this cmid has plagiarism enabled.
+        global $OUTPUT, $DB;
+        $plagiarismsettings = $this->get_settings();
+        $plagiarismvalues = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $cmid), '', 'name, value');
+        if (empty($plagiarismvalues['use_moorsp'])) {
+            // Moorsp not in use for this cm - return.
+            return true;
+        }
         echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
         $formatoptions = new stdClass;
         $formatoptions->noclean = true;
@@ -234,15 +262,34 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
 
 function moorsp_event_file_uploaded($eventdata) {
     $result = true;
-        //a file has been uploaded - submit this to the plagiarism prevention service.
-
     return $result;
 }
 function moorsp_event_files_done($eventdata) {
+    global $DB, $CFG;
     $result = true;
-        //mainly used by assignment finalize - used if you want to handle "submit for marking" events
-        //a file has been uploaded/finalised - submit this to the plagiarism prevention service.
+    $moorsp = new plagiarism_plugin_moorsp();
+    $plagiarismsettings = $moorsp->get_settings();
+    if (!$plagiarismsettings) {
+        return true;
+    }
+    if (!$moorsp->is_moorsp_used($eventdata)) {
+        return true;
+    }
+    $cmid = (!empty($eventdata->cm->id)) ? $eventdata->cm->id : $eventdata->cmid;
+    if (isset($plagiarismvalues['moorsp_draft_submit']) &&
+        $plagiarismvalues['moorsp_draft_submit'] == PLAGIARISM_MOORSP_DRAFTSUBMIT_FINAL) {
+        require_once("$CFG->dirroot/mod/assign/locallib.php");
+        require_once("$CFG->dirroot/mod/assign/submission/file/locallib.php");
 
+        $modulecontext = context_module::instance($eventdata->cmid);
+        $fs = get_file_storage();
+        if ($files = $fs->get_area_files($modulecontext->id, 'assignsubmission_file',
+            ASSIGNSUBMISSION_FILE_FILEAREA, $eventdata->itemid, "id", false)) {
+            foreach ($files as $file) {
+                
+            }
+        }
+    }
     return $result;
 }
 
