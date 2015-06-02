@@ -110,6 +110,42 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         return array('analyzed' => '', 'score' => '', 'reporturl' => '');
     }
     /**
+     * Updates a file record to be processed by Moorsp.
+     *
+     * @param int $cmid - course module id
+     * @param int $userid - user id
+     * @param mixed $file the file from file storage
+     * @return int - id of moorsp_files record
+     */
+    public function update_plagiarism_file($cmid, $userid, $file) {
+        global $DB;
+
+        $filehash = (!empty($file->identifier)) ? $file->identifier : $file->get_contenthash();
+        // Now update or insert record into urkund_files.
+        $plagiarismfile = $DB->get_record_sql(
+            "SELECT * FROM {plagiarism_urkund_files}
+                                 WHERE cm = ? AND userid = ? AND " .
+            "identifier = ?",
+            array($cmid, $userid, $filehash));
+        if (!empty($plagiarismfile)) {
+            return $plagiarismfile;
+        } else {
+            $plagiarismfile = new stdClass();
+            $plagiarismfile->cm = $cmid;
+            $plagiarismfile->userid = $userid;
+            $plagiarismfile->identifier = $filehash;
+            $plagiarismfile->filename = (!empty($file->filename)) ? $file->filename : $file->get_filename();
+            $plagiarismfile->statuscode = 'pending';
+            $plagiarismfile->attempt = 0;
+            $plagiarismfile->timesubmitted = time();
+            if (!$pid = $DB->insert_record('plagiarism_moorsp_files', $plagiarismfile)) {
+                debugging("insert into moorsp_files failed");
+            }
+            $plagiarismfile->id = $pid;
+            return $plagiarismfile;
+        }
+    }
+    /**
      * Hook to save plagiarism specific settings on a module settings page.
      * @param $data data from an mform submission.
      */
@@ -261,13 +297,16 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
 }
 
 function moorsp_event_file_uploaded($eventdata) {
+    global $DB, $CFG;
     $result = true;
+
     return $result;
 }
 function moorsp_event_files_done($eventdata) {
     global $DB, $CFG;
     $result = true;
     $moorsp = new plagiarism_plugin_moorsp();
+    $moorspfiles = array();
     $plagiarismsettings = $moorsp->get_settings();
     if (!$plagiarismsettings) {
         return true;
@@ -286,7 +325,7 @@ function moorsp_event_files_done($eventdata) {
         if ($files = $fs->get_area_files($modulecontext->id, 'assignsubmission_file',
             ASSIGNSUBMISSION_FILE_FILEAREA, $eventdata->itemid, "id", false)) {
             foreach ($files as $file) {
-                
+                $moorspfiles[] = $moorsp->update_plagiarism_file($cmid, $eventdata->userid, $file);
             }
         }
     }
