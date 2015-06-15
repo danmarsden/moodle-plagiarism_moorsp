@@ -30,42 +30,42 @@ $handlers = array (
     'assessable_file_uploaded' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_file_uploaded',
-        'schedule'         => 'cron'
+        'schedule'         => 'instant'
     ),
     'assessable_files_done' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_files_done',
-        'schedule'         => 'cron'
+        'schedule'         => 'instant'
     ),
     'assessable_content_uploaded' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_content_uploaded',
-        'schedule'         => 'cron'
+        'schedule'         => 'instant'
     ),
     'assessable_content_done' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_content_done',
-        'schedule'         => 'cron'
+        'schedule'         => 'instant'
     ),
     'mod_created' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_mod_created',
-        'schedule'         => 'cron'
+        'schedule'         => 'instant'
     ),
     'mod_updated' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_mod_updated',
-        'schedule'         => 'cron'
+        'schedule'         => 'instant'
     ),
     'mod_deleted' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_mod_deleted',
-        'schedule'         => 'cron'
+        'schedule'         => 'instant'
     ),
     'assessable_submitted' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_assessable_submitted',
-        'schedule'         => 'cron'
+        'schedule'         => 'instant'
     ),
 
 );

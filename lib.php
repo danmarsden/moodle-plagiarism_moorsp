@@ -395,7 +395,8 @@ function moorsp_event_files_done($eventdata) {
         if ($files = $fs->get_area_files($modulecontext->id, 'assignsubmission_file',
             ASSIGNSUBMISSION_FILE_FILEAREA, $eventdata->itemid, "id", false)) {
             foreach ($files as $file) {
-                $moorspfiles[] = $moorsp->update_plagiarism_file($cmid, $eventdata->userid, $file);
+                $submittedfile = $moorsp->update_plagiarism_file($cmid, $eventdata->userid, $file);
+                $result = $result && isset($submittedfile);
             }
         }
     }
