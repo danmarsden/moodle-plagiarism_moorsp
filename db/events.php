@@ -21,7 +21,7 @@
  * @copyright  2014 onwards Dan Marsden {@link http://danmarsden.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
+require_once($CFG->dirroot.'/plagiarism/moorsp/lib.php');
 $handlers = array (
 
     /*
@@ -68,4 +68,14 @@ $handlers = array (
         'schedule'         => 'instant'
     ),
 
+);
+
+$observers = array (
+    /**
+     * Event observers
+     */
+    array(
+        'eventname' => '\core\event\assessable_uploaded',
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_assessable_uploaded'
+    )
 );
