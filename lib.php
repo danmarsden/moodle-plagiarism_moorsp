@@ -303,15 +303,14 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @return bool Whether event handling was successful
      * @throws coding_exception
      */
-    public static function moorsp_observer_assessable_uploaded($eventdata) {
+    public function moorsp_observer_assessable_uploaded($eventdata) {
         global $DB, $CFG;
         $result = true;
-        $moorsp = new plagiarism_plugin_moorsp();
-        $plagiarismsettings = $moorsp->get_settings();
+        $plagiarismsettings = $this->get_settings();
         if (!$plagiarismsettings) {
             return true;
         }
-        if (!$moorsp->is_moorsp_used($eventdata)) {
+        if (!$this->is_moorsp_used($eventdata)) {
             return true;
         }
         $cmid = (!empty($eventdata->cm->id)) ? $eventdata->cm->id : $eventdata->cmid;
@@ -370,7 +369,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
                         }
                     }
                 }
-                $file = $moorsp->update_plagiarism_file($cmid, $eventdata->userid, $efile);
+                $file = $this->update_plagiarism_file($cmid, $eventdata->userid, $efile);
                 $result = $result && isset($file);
             }
         }
