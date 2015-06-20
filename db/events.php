@@ -22,11 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once($CFG->dirroot.'/plagiarism/moorsp/lib.php');
-$handlers = array (
+/*$handlers = array (
 
     /*
      * Event Handlers
-     */
+
     'assessable_file_uploaded' => array (
         'handlerfile'      => '/plagiarism/moorsp/lib.php',
         'handlerfunction'  => 'moorsp_event_file_uploaded',
@@ -68,14 +68,26 @@ $handlers = array (
         'schedule'         => 'instant'
     ),
 
-);
+);*/
 
 $observers = array (
     /**
      * Event observers
      */
     array(
-        'eventname' => '\core\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_assessable_uploaded'
+        'eventname' => '\assignsubmission_file\event\assessable_uploaded',
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded'
+    ),
+    array(
+        'eventname' => '\mod_workshop\event\assessable_uploaded',
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded'
+    ),
+    array(
+        'eventname' => '\mod_forum\event\assessable_uploaded',
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded'
+    ),
+    array(
+        'eventname' => '\assignsubmission_onlinetext\event\assessable_uploaded',
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded'
     )
 );

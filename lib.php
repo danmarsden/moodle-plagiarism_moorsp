@@ -109,13 +109,29 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
     public function get_file_results($cmid, $userid, $file) {
         return array('analyzed' => '', 'score' => '', 'reporturl' => '');
     }
+
+    /**
+     * Handles text submissions, storing it in moorsp_files table.
+     * @param $cmid Course module ID
+     * @param $userid User ID
+     * @param $content Content of the text submission
+     * @return bool Whether the store function was successful
+     */
+    public function moorsp_handle_onlinetext($cmid, $userid, $content) {
+        $filehash = md5($content);
+        $file = new stdClass();
+        $file->identifier = $filehash;
+        $file->filename = 'content_' . $filehash;
+        return $this->update_plagiarism_file($cmid, $userid, $file);
+
+    }
     /**
      * Updates a file record to be processed by Moorsp.
      *
-     * @param int $cmid - course module id
-     * @param int $userid - user id
+     * @param int $cmid course module id
+     * @param int $userid  user id
      * @param mixed $file the file from file storage
-     * @return int - id of moorsp_files record
+     * @return bool Whether the file was successfully stored
      */
     public function update_plagiarism_file($cmid, $userid, $file) {
         global $DB;
@@ -128,7 +144,8 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             "identifier = ?",
             array($cmid, $userid, $filehash));
         if (!empty($plagiarismfile)) {
-            return $plagiarismfile;
+            // File is already there, return true
+            return true;
         } else {
             $plagiarismfile = new stdClass();
             $plagiarismfile->cm = $cmid;
@@ -141,8 +158,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             if (!$pid = $DB->insert_record('plagiarism_moorsp_files', $plagiarismfile)) {
                 debugging("insert into moorsp_files failed");
             }
-            $plagiarismfile->id = $pid;
-            return $plagiarismfile;
+            return isset($pid);
         }
     }
     /**
@@ -182,7 +198,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @param object $context - current context
      */
     public function get_form_elements_module($mform, $context, $modulename = "") {
-        global $DB, $PAGE, $CFG;
+        global $DB;
         $ynoptions = array( 0 => get_string('no'), 1 => get_string('yes'));
         $studentshowoptions = array(0 => get_string("never"), 1 => get_string("always"));
         $moorspdraftoptions = array(
@@ -303,7 +319,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @return bool Whether event handling was successful
      * @throws coding_exception
      */
-    public function moorsp_observer_assessable_uploaded($eventdata) {
+    public function moorsp_observer_content_uploaded($eventdata) {
         global $DB, $CFG;
         $result = true;
         $plagiarismsettings = $this->get_settings();
@@ -369,12 +385,19 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
                         }
                     }
                 }
-                $file = $this->update_plagiarism_file($cmid, $eventdata->userid, $efile);
-                $result = $result && isset($file);
+                $fileresult = $this->update_plagiarism_file($cmid, $eventdata->userid, $efile);
+                $result = $result && $fileresult;
             }
+        }
+        // Online text submission scenario
+        if (!empty($eventdata->content)) {
+            $contentresult = $this->moorsp_handle_onlinetext($cmid, $eventdata->userid, $eventdata->content);
+            $result = $result && $contentresult;
         }
         return $result;
     }
+
+
 }
 
 function moorsp_event_file_uploaded($eventdata) {
