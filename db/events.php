@@ -21,7 +21,6 @@
  * @copyright  2014 onwards Dan Marsden {@link http://danmarsden.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once($CFG->dirroot.'/plagiarism/moorsp/lib.php');
 /*$handlers = array (
 
     /*
@@ -76,18 +75,22 @@ $observers = array (
      */
     array(
         'eventname' => '\assignsubmission_file\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded'
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_assign_assessable_uploaded',
+        'includefile' => '/plagiarism/moorsp/lib.php'
     ),
     array(
         'eventname' => '\mod_workshop\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded'
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded',
+        'includefile' => '/plagiarism/moorsp/lib.php'
     ),
     array(
         'eventname' => '\mod_forum\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded'
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded',
+        'includefile' => '/plagiarism/moorsp/lib.php'
     ),
     array(
         'eventname' => '\assignsubmission_onlinetext\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded'
+        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded',
+        'includefile' => '/plagiarism/moorsp/lib.php'
     )
 );
