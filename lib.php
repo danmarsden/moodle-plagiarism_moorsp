@@ -317,48 +317,47 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @param \assignsubmission_file\event\assessable_uploaded $event
      */
     public function moorsp_observer_assign_assessable_uploaded(
-        \assignsubmission_file\event\assessable_uploaded $event){
-        $this->moorsp_event_handler($event->get_data());
+        \assignsubmission_file\event\assessable_uploaded $event) {
+        $moorsp = new plagiarism_plugin_moorsp();
+        $moorsp->moorsp_handle_event($event->get_data());
     }
 
     /**
      * Handler for all plagiarism events, observers will route here.
      * @param $eventdata array Event data
-     * @return bool Whether the processing was successful
      * @throws coding_exception
      */
-    private function moorsp_event_handler($eventdata) {
+    public function moorsp_handle_event($eventdata) {
         global $DB, $CFG;
-        $result = true;
         $plagiarismsettings = $this->get_settings();
         if (!$plagiarismsettings) {
-            return true;
+            return;
         }
-        if (!$this->is_moorsp_used($eventdata)) {
-            return true;
+        if (!$this->is_moorsp_used($eventdata['courseid'])) {
+            return;
         }
-        $cmid = (!empty($eventdata->cm->id)) ? $eventdata->cm->id : $eventdata->cmid;
+        $cmid = $eventdata['courseid'];
         // Normal scenario - this is an upload event with one or more attached files
-        if (!empty($eventdata->pathnamehashes)) {
-            foreach ($eventdata->pathnamehashes as $hash) {
+        if (!empty($eventdata['other']['pathnamehashes'])) {
+            foreach ($eventdata['other']['pathnamehashes'] as $hash) {
                 $fs = get_file_storage();
                 $efile = $fs->get_file_by_hash($hash);
 
                 if (empty($efile)) {
                     mtrace("nofilefound!");
                     continue;
-                } else if ($efile->get_filename() ==='.') {
+                } else if ($efile->get_filename() === '.') {
                     // This is a directory - nothing to do.
                     continue;
                 }
 
                 // Check if assign group submission is being used.
-                if ($eventdata->modulename == 'assign') {
+                if ($eventdata['component'] == 'assignsubmission_file') {
                     require_once("$CFG->dirroot/mod/assign/locallib.php");
-                    $modulecontext = context_module::instance($eventdata->cmid);
+                    $modulecontext = context_module::instance($cmid);
                     $assign = new assign($modulecontext, false, false);
                     if (!empty($assign->get_instance()->teamsubmission)) {
-                        $mygroups = groups_get_user_groups($assign->get_course()->id, $eventdata->userid);
+                        $mygroups = groups_get_user_groups($assign->get_course()->id, $eventdata['userid']);
                         if (count($mygroups) == 1) {
                             $groupid = reset($mygroups)[0];
                             // Only users with single groups are supported - otherwise just use the normal userid on this record.
@@ -370,18 +369,18 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
                             }
                             // Find the earliest plagiarism record for this cm with any of these users.
                             $sql = 'cm = ? AND userid IN (' . implode(',', $userids) . ')';
-                            $previousfiles = $DB->get_records_select('plagiarism_moorsp_files', $sql, array($eventdata->cmid), 'id');
+                            $previousfiles = $DB->get_records_select('plagiarism_moorsp_files', $sql, array($cmid), 'id');
                             $sanitycheckusers = 10; // Search through this number of users to find a valid previous submission.
                             $i = 0;
                             foreach ($previousfiles as $pf) {
-                                if ($pf->userid == $eventdata->userid) {
+                                if ($pf->userid == $eventdata['userid']) {
                                     break; // The submission comes from this user so break.
                                 }
                                 // Sanity Check to make sure the user isn't in multiple groups.
                                 $pfgroups = groups_get_user_groups($assign->get_course()->id, $pf->userid);
                                 if (count($pfgroups) == 1) {
                                     // This user made the first valid submission so use their id when sending the file.
-                                    $eventdata->userid = $pf->userid;
+                                    $eventdata['userid'] = $pf->userid;
                                     break;
                                 }
                                 if ($i >= $sanitycheckusers) {
@@ -393,16 +392,14 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
                         }
                     }
                 }
-                $fileresult = $this->update_plagiarism_file($cmid, $eventdata->userid, $efile);
-                $result = $result && $fileresult;
+                $this->update_plagiarism_file($cmid, $eventdata['userid'], $efile);
             }
         }
         // Online text submission scenario
-        if (!empty($eventdata->content)) {
+        /*if (!empty($eventdata->content)) {
             $contentresult = $this->moorsp_handle_onlinetext($cmid, $eventdata->userid, $eventdata->content);
             $result = $result && $contentresult;
-        }
-        return $result;
+        }*/
     }
 
 

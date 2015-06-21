@@ -27,6 +27,7 @@ $string['studentdisclosure'] = 'Student Disclosure';
 $string['studentdisclosure_help'] = 'This text will be displayed to all students on the file upload page.';
 $string['moorspexplain'] = 'For more information on this plugin see: ';
 $string['pluginname'] = 'Moorsp';
+$string['moorsp'] = 'Moorsp Plagiarism Plugin';
 $string['usemoorsp'] ='Enable Moorsp';
 $string['savedconfigsuccess'] = 'Plagiarism Settings Saved';
 $string['moorsp_enableplugin'] = 'Enable Moorsp for {$a}';
