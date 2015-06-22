@@ -75,22 +75,19 @@ $observers = array (
      */
     array(
         'eventname' => '\assignsubmission_file\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_assign_assessable_uploaded',
-        'includefile' => '/plagiarism/moorsp/lib.php'
+        'callback' => 'plugin_moorsp_observer::assignsubmission_file_uploaded',
+        'includefile' => '/plagiarism/moorsp/observer.php'
     ),
     array(
         'eventname' => '\mod_workshop\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded',
-        'includefile' => '/plagiarism/moorsp/lib.php'
+        'callback' => 'plugin_moorsp_observer::moorsp_observer_content_uploaded'
     ),
     array(
         'eventname' => '\mod_forum\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded',
-        'includefile' => '/plagiarism/moorsp/lib.php'
+        'callback' => 'plugin_moorsp_observer::moorsp_observer_content_uploaded'
     ),
     array(
         'eventname' => '\assignsubmission_onlinetext\event\assessable_uploaded',
-        'callback' => 'plagiarism_plugin_moorsp::moorsp_observer_content_uploaded',
-        'includefile' => '/plagiarism/moorsp/lib.php'
+        'callback' => 'plugin_moorsp_observer::moorsp_observer_content_uploaded'
     )
 );
