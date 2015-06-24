@@ -88,7 +88,9 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         //$userid, $file, $cmid, $course, $module
         $cmid = $linkarray['cmid'];
         $userid = $linkarray['userid'];
-        $file = $linkarray['file'];
+        if (!empty($file)) {
+            $file = $linkarray['file'];
+        }
         $output = '';
         //add link/information about this file to $output
          
@@ -346,7 +348,8 @@ function moorsp_handle_event($eventdata) {
             }
 
             // Check if assign group submission is being used.
-            if ($eventdata['component'] == 'assignsubmission_file') {
+            if ($eventdata['component'] == 'assignsubmission_file'
+                || $eventdata['component'] == 'assignsubmission_onlinetext') {
                 require_once("$CFG->dirroot/mod/assign/locallib.php");
                 $modulecontext = context_module::instance($cmid);
                 $assign = new assign($modulecontext, false, false);
@@ -389,11 +392,10 @@ function moorsp_handle_event($eventdata) {
             $moorsp->update_plagiarism_file($cmid, $eventdata['userid'], $efile);
         }
     }
-    // Online text submission scenario
-    /*if (!empty($eventdata->content)) {
-        $contentresult = $this->moorsp_handle_onlinetext($cmid, $eventdata->userid, $eventdata->content);
-        $result = $result && $contentresult;
-    }*/
+    if (!empty($eventdata['other']['content'])) {
+        // Online text submission scenario
+        $moorsp->moorsp_handle_onlinetext($cmid, $eventdata['userid'], $eventdata['other']['content']);
+    }
 }
 
 

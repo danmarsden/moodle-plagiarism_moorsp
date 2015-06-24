@@ -23,13 +23,43 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class plugin_moorsp_observer {
+class plagiarism_moorsp_observer {
     /**
      * Observer function to handle the assessable_uploaded event in mod_assign.
      * @param \assignsubmission_file\event\assessable_uploaded $event
      */
     public static function assignsubmission_file_uploaded(
         \assignsubmission_file\event\assessable_uploaded $event) {
+        global $CFG;
+        require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
+        moorsp_handle_event($event->get_data());
+    }
+    /**
+     * Observer function to handle the assessable_uploaded event in mod_forum.
+     * @param \mod_forum\event\assessable_uploaded $event
+     */
+    public static function forum_file_uploaded(
+        \mod_forum\event\assessable_uploaded $event) {
+        global $CFG;
+        require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
+        moorsp_handle_event($event->get_data());
+    }
+    /**
+     * Observer function to handle the assessable_uploaded event in mod_workshop.
+     * @param \mod_workshop\event\assessable_uploaded $event
+     */
+    public static function workshop_file_uploaded(
+        \mod_workshop\event\assessable_uploaded $event) {
+        global $CFG;
+        require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
+        moorsp_handle_event($event->get_data());
+    }
+    /**
+     * Observer function to handle the assessable_uploaded event in mod_assign onlinetext.
+     * @param \assignsubmission_onlinetext\event\assessable_uploaded $event
+     */
+    public static function assignsubmission_onlinetext_uploaded(
+        \assignsubmission_onlinetext\event\assessable_uploaded $event) {
         global $CFG;
         require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
         moorsp_handle_event($event->get_data());
