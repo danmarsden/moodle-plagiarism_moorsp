@@ -35,3 +35,6 @@ $string['moorsp_show_student_plagiarism_info'] = 'Show plagiarism info to studen
 $string['submitondraft'] = 'Submit file when first uploaded';
 $string['submitonfinal'] = 'Submit file when student sends for marking';
 $string['moorsp_draft_submit'] = 'When should the file be analyzed by Moorsp';
+$string['pending'] = 'This file is pending processing by Moorsp';
+$string['not_plagiarised'] = 'This file contains original content.';
+$string['plagiarised'] = 'This file contains plagiarised content.';

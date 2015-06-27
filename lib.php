@@ -86,14 +86,47 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      */
     public function get_links($linkarray) {
         //$userid, $file, $cmid, $course, $module
+        global $OUTPUT;
         $cmid = $linkarray['cmid'];
         $userid = $linkarray['userid'];
-        if (!empty($file)) {
-            $file = $linkarray['file'];
+        if (!empty($linkarray['file'])) {
+            $file = new stdClass();
+            $file->filename = $linkarray['file']->get_filename();
+            $file->identifier = $linkarray['file']->get_contenthash();
+            $file->timestamp = time();
+            $file->filepath = $linkarray['file']->get_filepath();
+        } else if (!empty($linkarray['content'])) {
+            $file = new stdClass();
+            $contenthash = md5($linkarray['content']);
+            $file->filename = 'content_' . $contenthash;
+            $file->identifier = $contenthash;
+            $file->timestamp = time();
         }
+        $results = $this->get_file_results($cmid, $userid, $file);
         $output = '';
         //add link/information about this file to $output
-         
+        if ($results['analyzed'] == 0) {
+            $output .= '<span class="plagiarismreport">'.
+                '<img src="'.$OUTPUT->pix_url('processing', 'plagiarism_moorsp') .
+                '" alt="'.get_string('pending', 'plagiarism_moorsp').'" '.
+                '" title="'.get_string('pending', 'plagiarism_moorsp').'" />'.
+                '</span>';
+        } else {
+            if ($results['score'] == 1) {
+                $output .= '<span class="plagiarismreport">'.
+                    '<img src="'.$OUTPUT->pix_url('warning', 'plagiarism_moorsp') .
+                    '" alt="'.get_string('plagiarised', 'plagiarism_moorsp').'" '.
+                    '" title="'.get_string('plagiarised', 'plagiarism_moorsp').'" />'.
+                    '</span>';
+            } else {
+                $output .= '<span class="plagiarismreport">'.
+                    '<img src="'.$OUTPUT->pix_url('ok', 'plagiarism_moorsp') .
+                    '" alt="'.get_string('not_plagiarised', 'plagiarism_moorsp').'" '.
+                    '" title="'.get_string('not_plagiarised', 'plagiarism_moorsp').'" />'.
+                    '</span>';
+            }
+
+        }
         return $output;
     }
 
@@ -108,7 +141,61 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      *   - 'reporturl' - url of originality report - '' if unavailable
      */
     public function get_file_results($cmid, $userid, $file) {
-        return array('analyzed' => '', 'score' => '', 'reporturl' => '');
+        global $DB;
+        $plagiarismsettings = $this->get_settings();
+        if (!$plagiarismsettings) {
+            return false;
+        }
+        if (!$this->is_moorsp_used($cmid)) {
+            return false;
+        }
+        $filehash = $file->identifier;
+        $results = array('error' => '', 'score' => '',
+            'analyzed' => 0, 'reporturl' => ''
+        );
+
+        $modulecontext = context_module::instance($cmid);
+        // If the user has permission to see result of all items in this course module.
+        $viewscore = $viewreport = has_capability('plagiarism/moorsp:viewreport', $modulecontext);
+        // If the file has already been analyzed, return those results
+        $storedfile = $DB->get_record_sql(
+            "SELECT * FROM {plagiarism_moorsp_files}
+                                 WHERE cm = ? AND userid = ? AND " .
+            "identifier = ?",
+            array($cmid, $userid, $filehash));
+        if (empty($storedfile)) {
+            return false;
+        }
+        if ($storedfile->statuscode == 'analyzed') {
+            $results['analyzed'] = 1;
+            $results['score'] = $storedfile->similarity;
+            $results['error'] = $storedfile->errorresponse;
+        } else {
+            $plagiarismfile = $DB->get_record_sql(
+                "SELECT * FROM {plagiarism_moorsp_files}
+                                 WHERE userid != ? AND identifier = ?", array($userid, $filehash));
+            $updatefile = new stdClass();
+            $updatefile->id = $storedfile->id;
+            $updatefile->statuscode = 'analyzed';
+            $updatefile->attempt = $storedfile->attempt + 1;
+
+            $results['analyzed'] = 1;
+            if (!empty($plagiarismfile)) {
+                // File is plagiarised based on file content hash
+                $updatefile->similarity = 1;
+                $results['score'] = 1;
+            } else {
+                // File is not plagiarised.
+                $updatefile->similarity = 0;
+                $results['score'] = 0;
+            }
+            $DB->update_record('plagiarism_moorsp_files', $updatefile);
+        }
+        if (!$viewscore && !$viewreport) {
+            // User is not permitted to see any details.
+            return false;
+        }
+        return $results;
     }
 
     /**
@@ -118,7 +205,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @param $content Content of the text submission
      * @return bool Whether the store function was successful
      */
-    public function moorsp_handle_onlinetext($cmid, $userid, $content) {
+    public function handle_onlinetext($cmid, $userid, $content) {
         $filehash = md5($content);
         $file = new stdClass();
         $file->identifier = $filehash;
@@ -394,7 +481,7 @@ function moorsp_handle_event($eventdata) {
     }
     if (!empty($eventdata['other']['content'])) {
         // Online text submission scenario
-        $moorsp->moorsp_handle_onlinetext($cmid, $eventdata['userid'], $eventdata['other']['content']);
+        $moorsp->handle_onlinetext($cmid, $eventdata['userid'], $eventdata['other']['content']);
     }
 }
 
