@@ -282,7 +282,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
 
     /**
      * hook to add plagiarism specific settings to a module settings page
-     * @param object $mform  - Moodle form
+     * @param moodleform $mform  - Moodle form
      * @param object $context - current context
      */
     public function get_form_elements_module($mform, $context, $modulename = "") {
