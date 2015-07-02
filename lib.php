@@ -46,7 +46,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         if (!empty($plagiarismsettings) || $plagiarismsettings === false) {
             return $plagiarismsettings;
         }
-        $plagiarismsettings = $plagiarismsettings = array_merge((array)get_config('plagiarism'),
+        $plagiarismsettings = array_merge((array)get_config('plagiarism'),
             (array)get_config('plagiarism_moorsp'));
         // Check if enabled.
         if (isset($plagiarismsettings['moorsp_use']) && $plagiarismsettings['moorsp_use']) {
