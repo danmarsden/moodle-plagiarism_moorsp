@@ -108,68 +108,38 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
             && $plagiarismsettings['moorsp_use'];
         $this->assertEquals($expected, $moorsp->is_moorsp_used($this->assignment->id));
     }
-    public function test_get_form_elements_module() {
-        global $DB;
+    public function test_update_plagiarism_file() {
+        global $DB, $USER;
         $this->resetAfterTest(true);
-        $ynoptions = array( 0 => get_string('no'), 1 => get_string('yes'));
-        $studentshowoptions = array(0 => get_string("never"), 1 => get_string("always"));
-        $moorspdraftoptions = array(
-            PLAGIARISM_MOORSP_DRAFTSUBMIT_IMMEDIATE => get_string("submitondraft", "plagiarism_moorsp"),
-            PLAGIARISM_MOORSP_DRAFTSUBMIT_FINAL => get_string("submitonfinal", "plagiarism_moorsp")
-        );
         $moorsp = new plagiarism_plugin_moorsp();
-        $expectedform = new moorsp_test_form();
-        $plagiarismdefaults = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => 0), '', 'name, value');
-        $plagiarismelements = $this->config_options;
-
-        if (has_capability('plagiarism/moorsp:enable', $this->assignment)) {
-            $expectedform->addElement('header', 'plagiarismdesc', get_string('pluginname', 'plagiarism_moorsp'));
-            $expectedform->addElement('select', 'use_moorsp', get_string('usemoorsp', 'plagiarism_moorsp'), $ynoptions);
-            $expectedform->addElement('select', 'moorsp_show_student_plagiarism_info',
-                get_string("moorsp_show_student_plagiarism_info", "plagiarism_moorsp"), $studentshowoptions);
-            if ($expectedform->elementExists('submissiondrafts')) {
-                $expectedform->addElement('select', 'moorsp_draft_submit',
-                    get_string("moorsp_draft_submit", "plagiarism_moorsp"), $moorspdraftoptions);
-            }
-            if ($expectedform->elementExists('moorsp_draft_submit')) {
-                if ($expectedform->elementExists('submissiondrafts')) {
-                    $expectedform->disabledIf('moorsp_draft_submit', 'submissiondrafts', 'eq', 0);
-                }
-            }
-            // Disable all plagiarism elements if use_plagiarism eg 0.
-            foreach ($plagiarismelements as $element) {
-                if ($element <> 'use_moorsp') { // Ignore this var.
-                    $expectedform->disabledIf($element, 'use_moorsp', 'eq', 0);
-                }
-            }
-        } else { // Add plagiarism settings as hidden vars.
-            foreach ($plagiarismelements as $element) {
-                $expectedform->addElement('hidden', $element);
-                $expectedform->setType('use_moorsp', PARAM_INT);
-                $expectedform->setType('moorsp_show_student_plagiarism_info', PARAM_INT);
-                $expectedform->setType('moorsp_draft_submit', PARAM_INT);
-            }
-        }
-        // Now set defaults.
-        foreach ($plagiarismelements as $element) {
-            if (isset($plagiarismvalues[$element])) {
-                $expectedform->setDefault($element, $plagiarismvalues[$element]);
-            } else if (isset($plagiarismdefaults[$element])) {
-                $expectedform->setDefault($element, $plagiarismdefaults[$element]);
-            }
-        }
-
-        $actualform = new moorsp_test_form();
-        $moorsp->get_form_elements_module($actualform, $this->assignment, 'assign');
-        $this->assertTrue($actualform->elementExists('plagiarismdesc'));
-        $this->assertTrue($actualform->elementExists('use_moorsp'));
-        $this->assertTrue($actualform->elementExists('moorsp_show_student_plagiarism_info'));
-        $this->assertEquals($expectedform, $actualform);
-
-
-
-
-
+        $file = new stdClass();
+        $file->filename = "Test file";
+        $file->identifier = md5("Test file content");
+        $result = $moorsp->update_plagiarism_file($this->assignment->id,$USER->id,$file);
+        $this->assertTrue($result);
+        $plagiarismfile = $DB->get_record_sql(
+            "SELECT * FROM {plagiarism_moorsp_files}
+                                 WHERE cm = ? AND userid = ? AND " .
+            "identifier = ?",
+            array($this->assignment->id, $USER->id, $file->identifier));
+        $this->assertNotEmpty($plagiarismfile);
+        $this->assertEquals($file->filename, $plagiarismfile->filename);
+    }
+    public function test_handle_onlinetext() {
+        global $DB, $USER;
+        $this->resetAfterTest(true);
+        $moorsp = new plagiarism_plugin_moorsp();
+        $content = "Test content";
+        $contentmd5 = md5("Test content");
+        $result = $moorsp->handle_onlinetext($this->assignment->id, $USER->id, $content);
+        $this->assertTrue($result);
+        $contentrepresentation = $DB->get_record_sql(
+            "SELECT * FROM {plagiarism_moorsp_files}
+                                 WHERE cm = ? AND userid = ? AND " .
+            "identifier = ?",
+            array($this->assignment->id, $USER->id, $contentmd5));
+        $this->assertNotEmpty($contentrepresentation);
+        $this->assertEquals("content_" . $contentmd5, $contentrepresentation->filename);
     }
     /**
      * Convenience function to create a testable instance of an assignment.
@@ -187,9 +157,4 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
     }
 
 
-}
-class moorsp_test_form extends moodleform {
-    public function definition() {
-         $mform =& $this->_form;
-    }
 }
