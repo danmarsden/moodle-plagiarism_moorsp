@@ -8,3 +8,7 @@ Feature: Enable Moorsp
     Given the following "users" exist:
       | username | firstname | lastname | email              |
       | admin    | Admin     | User     | moodle@example.com |
+    And I log in as "admin"
+    And I navigate to "Advanced features" node in "Administration"
+    And I set the field "Enable plagiarism plugins" to "1"
+    And I press "Save changes"

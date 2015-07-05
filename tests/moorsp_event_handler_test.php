@@ -26,14 +26,15 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
 
+define('TEST_CONTENTHASH', '259e36493fc60699602b3e5d3593030022a0b29c');
 define('MOORSP_STUDENT_DISCLOSURE', get_string('studentdisclosure','plagiarism_moorsp'));
 
-class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
+class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
+    protected $eventdata = array();
     protected $course = null;
     protected $assignment = null;
     protected $config_options = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
-'moorsp_draft_submit');
-
+        'moorsp_draft_submit');
     /**
      * Function to set up a course and assignment for the tests.
      */
@@ -74,71 +75,55 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         $DB->insert_record('plagiarism_moorsp_config', $plagiarismenabledcm);
 
     }
-    public function test_print_disclosure() {
-        global $OUTPUT;
-        $this->resetAfterTest(true);
-        $moorsp = new plagiarism_plugin_moorsp();
-        $plagiarismsettings = array_merge((array)get_config('plagiarism'),
-            (array)get_config('plagiarism_moorsp'));
-
-        if (!empty($this->assignment->id)) {
-            $outputhtml = '';
-            $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
-            $formatoptions = new stdClass;
-            $formatoptions->noclean = true;
-            $outputhtml .= format_text($plagiarismsettings['moorsp_student_disclosure'], FORMAT_MOODLE, $formatoptions);
-            $outputhtml .= $OUTPUT->box_end();
-        }
-        $this->assertEquals($outputhtml, $moorsp->print_disclosure($this->assignment->id));
-    }
-    public function test_get_settings() {
-        $this->resetAfterTest(true);
-        $moorsp = new plagiarism_plugin_moorsp();
-        $plagiarismsettings = array_merge((array)get_config('plagiarism'),
-            (array)get_config('plagiarism_moorsp'));
-        $this->assertEquals($plagiarismsettings, $moorsp->get_settings());
-    }
-    public function test_is_moorsp_used() {
-        global $DB;
-        $this->resetAfterTest(true);
-        $moorsp = new plagiarism_plugin_moorsp();
-        $plagiarismsettings = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $this->assignment->id), '', 'name, value');
-        $expected = $DB->record_exists('course_modules', array('id' => $this->assignment->id))
-            && $plagiarismsettings['moorsp_use'];
-        $this->assertEquals($expected, $moorsp->is_moorsp_used($this->assignment->id));
-    }
-    public function test_update_plagiarism_file() {
+    public function test_assignsubmission_file_event() {
         global $DB, $USER;
+        $fs = get_file_storage();
         $this->resetAfterTest(true);
-        $moorsp = new plagiarism_plugin_moorsp();
-        $file = new stdClass();
-        $file->filename = "Test file";
-        $file->identifier = md5("Test file content");
-        $result = $moorsp->update_plagiarism_file($this->assignment->id,$USER->id,$file);
+        // Prepare file record object
+        $fileinfo = array(
+            'contextid' => $this->assignment->id,
+            'component' => 'assignsubmission_file',
+            'filearea' => 'submission_files',
+            'itemid' => 0,
+            'filepath' => '/',
+            'filename' => 'testfile.txt');
+        $testfile = $fs->create_file_from_string($fileinfo, 'Test content');
+        $eventdata = array(
+            'eventname'         => '\assignsubmission_file\event\assessable_uploaded',
+            'component'         => 'assignsubmission_file',
+            'action'            => 'uploaded',
+            'target'            => 'assessable',
+            'objecttable'       => 'assign_submission',
+            'objectid'          => 1,
+            'crud'              => 'c',
+            'edulevel'          => 2,
+            'contextid'         => $this->course->id,
+            'contextlevel'      => 70,
+            'contextinstanceid' => $this->assignment->id,
+            'userid'            => $USER->id,
+            'courseid'          => $this->course->id,
+            'relateduserid'     => null,
+            'anonymous'         => 0,
+            'other'             => array(
+                                    'content' => '',
+                                    'pathnamehashes' => array(
+                                        $testfile->get_contenthash()
+                                    )
+            ),
+            'timecreated' => time()
+
+
+        );
+        $result = moorsp_handle_event($eventdata);
         $this->assertTrue($result);
         $plagiarismfile = $DB->get_record_sql(
             "SELECT * FROM {plagiarism_moorsp_files}
                                  WHERE cm = ? AND userid = ? AND " .
             "identifier = ?",
-            array($this->assignment->id, $USER->id, $file->identifier));
+            array($this->assignment->id, $USER->id, $testfile->get_contenthash()));
         $this->assertNotEmpty($plagiarismfile);
-        $this->assertEquals($file->filename, $plagiarismfile->filename);
-    }
-    public function test_handle_onlinetext() {
-        global $DB, $USER;
-        $this->resetAfterTest(true);
-        $moorsp = new plagiarism_plugin_moorsp();
-        $content = "Test content";
-        $contentmd5 = md5("Test content");
-        $result = $moorsp->handle_onlinetext($this->assignment->id, $USER->id, $content);
-        $this->assertTrue($result);
-        $contentrepresentation = $DB->get_record_sql(
-            "SELECT * FROM {plagiarism_moorsp_files}
-                                 WHERE cm = ? AND userid = ? AND " .
-            "identifier = ?",
-            array($this->assignment->id, $USER->id, $contentmd5));
-        $this->assertNotEmpty($contentrepresentation);
-        $this->assertEquals("content_" . $contentmd5, $contentrepresentation->filename);
+        $this->assertEquals($testfile->get_filename(), $plagiarismfile->filename);
+
     }
     /**
      * Convenience function to create a testable instance of an assignment.
@@ -154,6 +139,4 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         $context = context_module::instance($cm->id);
         return $context;
     }
-
-
 }

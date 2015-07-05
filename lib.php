@@ -414,10 +414,10 @@ function moorsp_handle_event($eventdata) {
     $moorsp = new plagiarism_plugin_moorsp();
     $plagiarismsettings = $moorsp->get_settings();
     if (!$plagiarismsettings) {
-        return;
+        return false;
     }
     if (!$moorsp->is_moorsp_used($eventdata['contextinstanceid'])) {
-        return;
+        return false;
     }
     $cmid = $eventdata['contextinstanceid'];
     // Normal scenario - this is an upload event with one or more attached files
@@ -476,12 +476,12 @@ function moorsp_handle_event($eventdata) {
                     }
                 }
             }
-            $moorsp->update_plagiarism_file($cmid, $eventdata['userid'], $efile);
+            return $moorsp->update_plagiarism_file($cmid, $eventdata['userid'], $efile);
         }
     }
     if (!empty($eventdata['other']['content'])) {
         // Online text submission scenario
-        $moorsp->handle_onlinetext($cmid, $eventdata['userid'], $eventdata['other']['content']);
+        return $moorsp->handle_onlinetext($cmid, $eventdata['userid'], $eventdata['other']['content']);
     }
 }
 
