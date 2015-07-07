@@ -67,6 +67,9 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         $useforcm = false;
         $cmenabled = false;
         $plagiarismvalues = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $cmid), '', 'name, value');
+        if (empty($plagiarismvalues)) {
+            return false;
+        }
         if ($plagiarismvalues['use_moorsp']) {
             // Moorsp is used for this cm
             $useforcm = true;

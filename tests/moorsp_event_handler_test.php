@@ -39,7 +39,7 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
      * Function to set up a course and assignment for the tests.
      */
     protected function setUp(){
-        global $DB;
+        global $DB, $USER;
         $tomorrow = time() + 24*60*60;
         $this->setAdminUser();
         // Need to enable Moorsp first
@@ -66,10 +66,11 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
         $DB->insert_record('config_plugins', $setting);
         // Create a course
         $this->course = $this->getDataGenerator()->create_course();
+        $this->getDataGenerator()->enrol_user($USER->id, $this->course->id);
         $this->assignment = $this->create_assign_instance($this->course, array('duedate'=>$tomorrow));
         // Enable Moorsp for this context module
         $plagiarismenabledcm = new stdClass();
-        $plagiarismenabledcm->cm = $this->assignment->id;
+        $plagiarismenabledcm->cm = $this->assignment->instanceid;
         $plagiarismenabledcm->name = 'use_moorsp';
         $plagiarismenabledcm->value = 1;
         $DB->insert_record('plagiarism_moorsp_config', $plagiarismenabledcm);
@@ -97,9 +98,9 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
             'objectid'          => 1,
             'crud'              => 'c',
             'edulevel'          => 2,
-            'contextid'         => $this->course->id,
-            'contextlevel'      => 70,
-            'contextinstanceid' => $this->assignment->id,
+            'contextid'         => $this->assignment->id,
+            'contextlevel'      => $this->assignment->contextlevel,
+            'contextinstanceid' => $this->assignment->instanceid,
             'userid'            => $USER->id,
             'courseid'          => $this->course->id,
             'relateduserid'     => null,
@@ -107,7 +108,7 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
             'other'             => array(
                                     'content' => '',
                                     'pathnamehashes' => array(
-                                        $testfile->get_contenthash()
+                                        $testfile->get_pathnamehash()
                                     )
             ),
             'timecreated' => time()
@@ -120,7 +121,7 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
             "SELECT * FROM {plagiarism_moorsp_files}
                                  WHERE cm = ? AND userid = ? AND " .
             "identifier = ?",
-            array($this->assignment->id, $USER->id, $testfile->get_contenthash()));
+            array($this->assignment->instanceid, $USER->id, $testfile->get_contenthash()));
         $this->assertNotEmpty($plagiarismfile);
         $this->assertEquals($testfile->get_filename(), $plagiarismfile->filename);
 

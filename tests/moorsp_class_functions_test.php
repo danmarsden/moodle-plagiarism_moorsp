@@ -68,7 +68,7 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         $this->assignment = $this->create_assign_instance($this->course, array('duedate'=>$tomorrow));
         // Enable Moorsp for this context module
         $plagiarismenabledcm = new stdClass();
-        $plagiarismenabledcm->cm = $this->assignment->id;
+        $plagiarismenabledcm->cm = $this->assignment->instanceid;
         $plagiarismenabledcm->name = 'use_moorsp';
         $plagiarismenabledcm->value = 1;
         $DB->insert_record('plagiarism_moorsp_config', $plagiarismenabledcm);
@@ -81,7 +81,7 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         $plagiarismsettings = array_merge((array)get_config('plagiarism'),
             (array)get_config('plagiarism_moorsp'));
 
-        if (!empty($this->assignment->id)) {
+        if (!empty($this->assignment->instanceid)) {
             $outputhtml = '';
             $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
             $formatoptions = new stdClass;
@@ -89,7 +89,7 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
             $outputhtml .= format_text($plagiarismsettings['moorsp_student_disclosure'], FORMAT_MOODLE, $formatoptions);
             $outputhtml .= $OUTPUT->box_end();
         }
-        $this->assertEquals($outputhtml, $moorsp->print_disclosure($this->assignment->id));
+        $this->assertEquals($outputhtml, $moorsp->print_disclosure($this->assignment->instanceid));
     }
     public function test_get_settings() {
         $this->resetAfterTest(true);
@@ -102,10 +102,10 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         global $DB;
         $this->resetAfterTest(true);
         $moorsp = new plagiarism_plugin_moorsp();
-        $plagiarismsettings = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $this->assignment->id), '', 'name, value');
-        $expected = $DB->record_exists('course_modules', array('id' => $this->assignment->id))
-            && $plagiarismsettings['moorsp_use'];
-        $this->assertEquals($expected, $moorsp->is_moorsp_used($this->assignment->id));
+        $plagiarismsettings = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $this->assignment->instanceid), '', 'name, value');
+        $expected = $DB->record_exists('course_modules', array('id' => $this->assignment->instanceid))
+            && $plagiarismsettings['use_moorsp'];
+        $this->assertEquals($expected, $moorsp->is_moorsp_used($this->assignment->instanceid));
     }
     public function test_update_plagiarism_file() {
         global $DB, $USER;
@@ -114,13 +114,13 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         $file = new stdClass();
         $file->filename = "Test file";
         $file->identifier = md5("Test file content");
-        $result = $moorsp->update_plagiarism_file($this->assignment->id,$USER->id,$file);
+        $result = $moorsp->update_plagiarism_file($this->assignment->instanceid,$USER->id,$file);
         $this->assertTrue($result);
         $plagiarismfile = $DB->get_record_sql(
             "SELECT * FROM {plagiarism_moorsp_files}
                                  WHERE cm = ? AND userid = ? AND " .
             "identifier = ?",
-            array($this->assignment->id, $USER->id, $file->identifier));
+            array($this->assignment->instanceid, $USER->id, $file->identifier));
         $this->assertNotEmpty($plagiarismfile);
         $this->assertEquals($file->filename, $plagiarismfile->filename);
     }
@@ -130,13 +130,13 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         $moorsp = new plagiarism_plugin_moorsp();
         $content = "Test content";
         $contentmd5 = md5("Test content");
-        $result = $moorsp->handle_onlinetext($this->assignment->id, $USER->id, $content);
+        $result = $moorsp->handle_onlinetext($this->assignment->instanceid, $USER->id, $content);
         $this->assertTrue($result);
         $contentrepresentation = $DB->get_record_sql(
             "SELECT * FROM {plagiarism_moorsp_files}
                                  WHERE cm = ? AND userid = ? AND " .
             "identifier = ?",
-            array($this->assignment->id, $USER->id, $contentmd5));
+            array($this->assignment->instanceid, $USER->id, $contentmd5));
         $this->assertNotEmpty($contentrepresentation);
         $this->assertEquals("content_" . $contentmd5, $contentrepresentation->filename);
     }
