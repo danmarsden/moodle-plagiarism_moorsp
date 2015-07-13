@@ -1,8 +1,8 @@
-@plugin @plagiarism_moorsp
-Feature: Enable Moorsp for assignment
-  In order to add plagiarism checking to an assignment
+@plugin @plagiarism_moorsp @test
+Feature: Enable Moorsp for workshop
+  In order to add plagiarism checking to an workshop
   As a teacher
-  I need to be able to enable Moorsp for that assignment
+  I need to be able to enable Moorsp for that workshop
 
   Background:
     Given the following "courses" exist:
@@ -20,7 +20,7 @@ Feature: Enable Moorsp for assignment
     And I press "Save changes"
     And I navigate to "Moorsp" node in "Site administration>Plugins>Plagiarism"
     And I set the field "Enable Moorsp" to "1"
-    And I set the field "Enable Moorsp for assign" to "1"
+    And I set the field "Enable Moorsp for workshop" to "1"
     And I press "Save changes"
     And I log out
     And I log in as "teacher1"
@@ -28,14 +28,13 @@ Feature: Enable Moorsp for assignment
     And I turn editing mode on
 
   @javascript
-  Scenario: Create an assignment and enable Moorsp for it
-    Given I add a "Assignment" to section "1" and I fill the form with:
-      | Assignment name | Test assignment |
-      | Description | Test assignment for Moorsp |
-      | Require students click submit button | Yes |
+  Scenario: Create a forum and enable Moorsp for it
+    Given I add a "Workshop" to section "1" and I fill the form with:
+      | Workshop name | Test workshop |
+      | Description | Test workshop for Moorsp |
       | Enable Moorsp | Yes |
       | Show plagiarism info to student | Always |
-    When I follow "Test assignment"
-    And I navigate to "Edit settings" node in "Assignment administration"
+    When I follow "Test workshop"
+    And I navigate to "Edit settings" node in "Workshop administration"
     Then the field "Enable Moorsp" matches value "Yes"
     And the field "Show plagiarism info to student" matches value "Always"
