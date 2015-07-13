@@ -368,7 +368,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             return true;
         }
         $outputhtml = '';
-        $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
+        $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter plagiarism_disclosure', 'intro');
         $formatoptions = new stdClass;
         $formatoptions->noclean = true;
         $outputhtml .= format_text($plagiarismsettings['moorsp_student_disclosure'], FORMAT_MOODLE, $formatoptions);
