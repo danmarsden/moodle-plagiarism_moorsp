@@ -157,9 +157,8 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             'analyzed' => 0, 'reporturl' => ''
         );
 
-        $modulecontext = context_module::instance($cmid);
         // If the user has permission to see result of all items in this course module.
-        $viewscore = $viewreport = has_capability('plagiarism/moorsp:viewreport', $modulecontext);
+        //$viewscore = $viewreport = has_capability('plagiarism/moorsp:viewreport', $modulecontext);
         // If the file has already been analyzed, return those results
         $storedfile = $DB->get_record_sql(
             "SELECT * FROM {plagiarism_moorsp_files}
@@ -194,10 +193,10 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             }
             $DB->update_record('plagiarism_moorsp_files', $updatefile);
         }
-        if (!$viewscore && !$viewreport) {
+        /*if (!$viewscore && !$viewreport) {
             // User is not permitted to see any details.
             return false;
-        }
+        }*/
         return $results;
     }
 
