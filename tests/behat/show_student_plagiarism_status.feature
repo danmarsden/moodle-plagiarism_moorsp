@@ -47,4 +47,4 @@ Feature: Show plagiarism status to student
     When I press "Add submission"
     And I upload "lib/tests/fixtures/empty.txt" file to "File submissions" filemanager
     And I press "Save changes"
-    Then I should see "This file contains original content" in the ".plagiarismreport" "css_element"
+    Then "This file contains original content" "img" should exist in the ".plagiarismreport" "css_element"
