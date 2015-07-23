@@ -1,4 +1,4 @@
-@plugin @plagiarism_moorsp @test
+@plugin @plagiarism_moorsp @_file_upload
 Feature: Show plagiarism status to student
   In order to check whether my file submission has passed the plagiarism test
   As a student
@@ -95,3 +95,39 @@ Feature: Show plagiarism status to student
     And I upload "lib/tests/fixtures/upload_users.csv" file to "Attachment" filemanager
     And I press "Save changes"
     Then ".not-plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
+
+  @javascript
+  Scenario: View plagiarism check information after a file submission is added to a forum
+    Given I add a "Forum" to section "1" and I fill the form with:
+      | Forum name | Test forum |
+      | Forum type | Standard forum for general use |
+      | Description | Test forum for Moorsp |
+      | Enable Moorsp | Yes |
+      | Show plagiarism info to student | Always |
+      | Group mode | No groups |
+    And I add a new discussion to "Test forum" forum with:
+      | Subject | Forum post 1 |
+      | Message | This is the body |
+    And I log out
+    And I log in as "student1"
+    And I follow "Course 1"
+    And I add a new discussion to "Test forum" forum with:
+      | Subject | Test subject |
+      | Message | Isn't this the greatest forum ever? |
+      | Attachment | lib/tests/fixtures/empty.txt |
+    And I follow "Test subject"
+    And ".not-plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
+    And I log out
+    And I wait "70" seconds
+    And I log in as "student2"
+    And I follow "Course 1"
+    And I reply "Test subject" post from "Test forum" forum with:
+      | Subject | Re: Test subject |
+      | Message | Nah, I've seen better. |
+      | Attachment | lib/tests/fixtures/empty.txt |
+    And ".plagiarised" "css_element" should exist in the "div.indent div.forumpost" "css_element"
+    When I follow "Edit"
+    And I delete "empty.txt" from "Attachment" filemanager
+    And I upload "lib/tests/fixtures/upload_users.csv" file to "Attachment" filemanager
+    And I press "Save changes"
+    Then ".not-plagiarised" "css_element" should exist in the "div.indent div.forumpost" "css_element"
