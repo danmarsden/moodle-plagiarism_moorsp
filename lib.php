@@ -107,6 +107,9 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         }
         $results = $this->get_file_results($cmid, $userid, $file);
         $output = '';
+        if (!$results) {
+            return $output;
+        }
         //add link/information about this file to $output
         if ($results['analyzed'] == 0) {
             $output .= '<span class="plagiarismreport">'.
@@ -114,17 +117,19 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
                 '" alt="'.get_string('pending', 'plagiarism_moorsp').'" '.
                 '" title="'.get_string('pending', 'plagiarism_moorsp').'" />'.
                 '</span>';
-        } else {
+        } else if ($results['analyzed'] == 1) {
             if ($results['score'] == 1) {
                 $output .= '<span class="plagiarismreport">'.
                     '<img src="'.$OUTPUT->pix_url('warning', 'plagiarism_moorsp') .
                     '" alt="'.get_string('plagiarised', 'plagiarism_moorsp').'" '.
+                    '" class="plagiarised" '.
                     '" title="'.get_string('plagiarised', 'plagiarism_moorsp').'" />'.
                     '</span>';
             } else {
                 $output .= '<span class="plagiarismreport">'.
                     '<img src="'.$OUTPUT->pix_url('ok', 'plagiarism_moorsp') .
                     '" alt="'.get_string('not_plagiarised', 'plagiarism_moorsp').'" '.
+                    '" class="not-plagiarised" '.
                     '" title="'.get_string('not_plagiarised', 'plagiarism_moorsp').'" />'.
                     '</span>';
             }
@@ -146,6 +151,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
     public function get_file_results($cmid, $userid, $file) {
         global $DB;
         $plagiarismsettings = $this->get_settings();
+        $plagiarismvalues = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $cmid), '', 'name, value');
         if (!$plagiarismsettings) {
             return false;
         }
@@ -157,8 +163,10 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             'analyzed' => 0, 'reporturl' => ''
         );
 
+        $modulecontext = context_module::instance($cmid);
         // If the user has permission to see result of all items in this course module.
-        //$viewscore = $viewreport = has_capability('plagiarism/moorsp:viewreport', $modulecontext);
+        $viewreport = has_capability('plagiarism/moorsp:viewreport', $modulecontext)
+            || $plagiarismvalues['moorsp_show_student_plagiarism_info'];
         // If the file has already been analyzed, return those results
         $storedfile = $DB->get_record_sql(
             "SELECT * FROM {plagiarism_moorsp_files}
@@ -193,10 +201,10 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             }
             $DB->update_record('plagiarism_moorsp_files', $updatefile);
         }
-        /*if (!$viewscore && !$viewreport) {
+        if (!$viewreport) {
             // User is not permitted to see any details.
             return false;
-        }*/
+        }
         return $results;
     }
 
