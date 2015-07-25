@@ -100,7 +100,8 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             $file->filepath = $linkarray['file']->get_filepath();
         } else if (!empty($linkarray['content'])) {
             $file = new stdClass();
-            $contenthash = md5($linkarray['content']);
+            $contenthash = md5(trim($linkarray['content']));
+            debugging(print_r($linkarray, true));
             $file->filename = 'content_' . $contenthash;
             $file->identifier = $contenthash;
             $file->timestamp = time();
@@ -174,6 +175,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             "identifier = ?",
             array($cmid, $userid, $filehash));
         if (empty($storedfile)) {
+            debugging("file not found, userid: ". $userid . " cmid: " . $cmid . " filehash: " . $filehash . " file: " . print_r($file, true));
             return false;
         }
         if ($storedfile->statuscode == 'analyzed') {
@@ -202,6 +204,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             $DB->update_record('plagiarism_moorsp_files', $updatefile);
         }
         if (!$viewreport) {
+            debugging("user not permitted to view");
             // User is not permitted to see any details.
             return false;
         }
@@ -216,7 +219,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @return bool Whether the store function was successful
      */
     public function handle_onlinetext($cmid, $userid, $content) {
-        $filehash = md5($content);
+        $filehash = md5(trim($content));
         $file = new stdClass();
         $file->identifier = $filehash;
         $file->filename = 'content_' . $filehash;
