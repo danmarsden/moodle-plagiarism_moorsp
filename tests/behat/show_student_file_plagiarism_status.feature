@@ -1,4 +1,4 @@
-@plugin @plagiarism_moorsp @_file_upload
+@plugin @plagiarism_moorsp @_file_upload @test
 Feature: Show plagiarism status to student
   In order to check whether my file submission has passed the plagiarism test
   As a student
@@ -105,9 +105,6 @@ Feature: Show plagiarism status to student
       | Enable Moorsp | Yes |
       | Show plagiarism info to student | Always |
       | Group mode | No groups |
-    And I add a new discussion to "Test forum" forum with:
-      | Subject | Forum post 1 |
-      | Message | This is the body |
     And I log out
     And I log in as "student1"
     And I follow "Course 1"
@@ -118,7 +115,6 @@ Feature: Show plagiarism status to student
     And I follow "Test subject"
     And ".not-plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
     And I log out
-    And I wait "70" seconds
     And I log in as "student2"
     And I follow "Course 1"
     And I reply "Test subject" post from "Test forum" forum with:

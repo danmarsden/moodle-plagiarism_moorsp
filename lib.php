@@ -101,7 +101,6 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         } else if (!empty($linkarray['content'])) {
             $file = new stdClass();
             $contenthash = md5(trim($linkarray['content']));
-            debugging(print_r($linkarray, true));
             $file->filename = 'content_' . $contenthash;
             $file->identifier = $contenthash;
             $file->timestamp = time();
@@ -175,7 +174,6 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             "identifier = ?",
             array($cmid, $userid, $filehash));
         if (empty($storedfile)) {
-            debugging("file not found, userid: ". $userid . " cmid: " . $cmid . " filehash: " . $filehash . " file: " . print_r($file, true));
             return false;
         }
         if ($storedfile->statuscode == 'analyzed') {
@@ -204,7 +202,6 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             $DB->update_record('plagiarism_moorsp_files', $updatefile);
         }
         if (!$viewreport) {
-            debugging("user not permitted to view");
             // User is not permitted to see any details.
             return false;
         }
@@ -218,8 +215,13 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @param $content Content of the text submission
      * @return bool Whether the store function was successful
      */
-    public function handle_onlinetext($cmid, $userid, $content) {
-        $filehash = md5(trim($content));
+    public function handle_onlinetext($cmid, $userid, $content, $overflowenabled = false) {
+        // Dirty hack, Moodle adds no-overflow div to online text submissions
+        if ($overflowenabled) {
+            $filehash = md5(trim('<div class="no-overflow">'.$content.'</div>'));
+        } else {
+            $filehash = md5(trim($content));
+        }
         $file = new stdClass();
         $file->identifier = $filehash;
         $file->filename = 'content_' . $filehash;
@@ -493,8 +495,13 @@ function moorsp_handle_event($eventdata) {
         }
     }
     if (!empty($eventdata['other']['content'])) {
+        $overflowenabled = false;
+        if ($eventdata['component'] == 'assignsubmission_onlinetext') {
+            $overflowenabled = true;
+        }
         // Online text submission scenario
-        return $moorsp->handle_onlinetext($cmid, $eventdata['userid'], $eventdata['other']['content']);
+        return $moorsp->handle_onlinetext($cmid, $eventdata['userid'],
+            $eventdata['other']['content'], $overflowenabled);
     }
 }
 
