@@ -1,8 +1,8 @@
 @plugin @plagiarism_moorsp @_file_upload
-Feature: Show plagiarism status to student
-  In order to check whether my file submission has passed the plagiarism test
-  As a student
-  I need to see the plagiarism status of my file submission
+Feature: Show plagiarism status to teacher
+  In order to check whether a student's submission has passed the plagiarism test
+  As a teacher
+  I need to see the plagiarism status of a student's submission
 
   Background:
     Given the following "courses" exist:
@@ -25,7 +25,6 @@ Feature: Show plagiarism status to student
     And I navigate to "Moorsp" node in "Site administration>Plugins>Plagiarism"
     And I set the field "Enable Moorsp" to "1"
     And I set the field "Enable Moorsp for assign" to "1"
-    And I set the field "Enable Moorsp for forum" to "1"
     And I set the field "Enable Moorsp for workshop" to "1"
     And I press "Save changes"
     And I log out
@@ -38,7 +37,7 @@ Feature: Show plagiarism status to student
     Given I add a "Assignment" to section "1" and I fill the form with:
       | Assignment name | Test assignment |
       | Description | Test assignment for Moorsp |
-      | Require students click submit button | Yes |
+      | Require students click submit button | No |
       | Enable Moorsp | Yes |
       | Show plagiarism info to student | Always |
     And I log out
@@ -48,7 +47,6 @@ Feature: Show plagiarism status to student
     And I press "Add submission"
     And I upload "lib/tests/fixtures/empty.txt" file to "File submissions" filemanager
     And I press "Save changes"
-    And ".not-plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
     And I log out
     And I log in as "student2"
     And I follow "Course 1"
@@ -56,12 +54,13 @@ Feature: Show plagiarism status to student
     When I press "Add submission"
     And I upload "lib/tests/fixtures/empty.txt" file to "File submissions" filemanager
     And I press "Save changes"
-    And ".plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
-    And I press "Edit submission"
-    And I delete "empty.txt" from "File submissions" filemanager
-    And I upload "lib/tests/fixtures/upload_users.csv" file to "File submissions" filemanager
-    And I press "Save changes"
-    Then ".not-plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
+    And I log out
+    When I log in as "teacher1"
+    And I follow "Course 1"
+    And I follow "Test assignment"
+    And I follow "View/grade all submissions"
+    Then ".not-plagiarised" "css_element" should exist in the "Student 1" "table_row"
+    And ".plagiarised" "css_element" should exist in the "Student 2" "table_row"
 
   @javascript
   Scenario: View plagiarism check information after a file submission is added to a workshop
@@ -80,7 +79,6 @@ Feature: Show plagiarism status to student
     And I set the field "Title" to "Test submission"
     And I upload "lib/tests/fixtures/empty.txt" file to "Attachment" filemanager
     And I press "Save changes"
-    And ".not-plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
     And I log out
     And I log in as "student2"
     And I follow "Course 1"
@@ -89,41 +87,16 @@ Feature: Show plagiarism status to student
     And I set the field "Title" to "Test submission 2"
     And I upload "lib/tests/fixtures/empty.txt" file to "Attachment" filemanager
     And I press "Save changes"
-    And ".plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
-    When I press "Edit submission"
-    And I delete "empty.txt" from "Attachment" filemanager
-    And I upload "lib/tests/fixtures/upload_users.csv" file to "Attachment" filemanager
-    And I press "Save changes"
+    And I log out
+    And I log in as "teacher1"
+    And I follow "Course 1"
+    And I follow "Test workshop"
+    And I change phase in workshop "Test workshop" to "Assessment phase"
+    When I follow "Test submission"
     Then ".not-plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
+    And I follow "Test workshop"
+    And I follow "Test submission 2"
+    And ".plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
 
-  @javascript
-  Scenario: View plagiarism check information after a file submission is added to a forum
-    Given I add a "Forum" to section "1" and I fill the form with:
-      | Forum name | Test forum |
-      | Forum type | Standard forum for general use |
-      | Description | Test forum for Moorsp |
-      | Enable Moorsp | Yes |
-      | Show plagiarism info to student | Always |
-      | Group mode | No groups |
-    And I log out
-    And I log in as "student1"
-    And I follow "Course 1"
-    And I add a new discussion to "Test forum" forum with:
-      | Subject | Test subject |
-      | Message | Isn't this the greatest forum ever? |
-      | Attachment | lib/tests/fixtures/empty.txt |
-    And I follow "Test subject"
-    And ".not-plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
-    And I log out
-    And I log in as "student2"
-    And I follow "Course 1"
-    And I reply "Test subject" post from "Test forum" forum with:
-      | Subject | Re: Test subject |
-      | Message | Nah, I've seen better. |
-      | Attachment | lib/tests/fixtures/empty.txt |
-    And ".plagiarised" "css_element" should exist in the "div.indent div.forumpost" "css_element"
-    When I follow "Edit"
-    And I delete "empty.txt" from "Attachment" filemanager
-    And I upload "lib/tests/fixtures/upload_users.csv" file to "Attachment" filemanager
-    And I press "Save changes"
-    Then ".not-plagiarised" "css_element" should exist in the "div.indent div.forumpost" "css_element"
+
+

@@ -1,4 +1,4 @@
-@plugin @plagiarism_moorsp @test
+@plugin @plagiarism_moorsp
 Feature: Show plagiarism status to student
   In order to check whether my file submission has passed the plagiarism test
   As a student
