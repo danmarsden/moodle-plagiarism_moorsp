@@ -97,6 +97,3 @@ Feature: Show plagiarism status to teacher
     And I follow "Test workshop"
     And I follow "Test submission 2"
     And ".plagiarised" "css_element" should exist in the ".plagiarismreport" "css_element"
-
-
-
