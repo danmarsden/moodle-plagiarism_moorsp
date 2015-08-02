@@ -83,7 +83,7 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
 
         if (!empty($this->assignment->instanceid)) {
             $outputhtml = '';
-            $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
+            $outputhtml .= $OUTPUT->box_start('generalbox boxaligncenter plagiarism_disclosure', 'intro');
             $formatoptions = new stdClass;
             $formatoptions->noclean = true;
             $outputhtml .= format_text($plagiarismsettings['moorsp_student_disclosure'], FORMAT_MOODLE, $formatoptions);
