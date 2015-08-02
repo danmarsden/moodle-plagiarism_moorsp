@@ -1,7 +1,9 @@
 ## Moorsp Plagiarism Plugin for Moodle
 
 Moorsp - A really simple Plagiarism tool for Moodle.
-Author: Dan Marsden <dan@danmarsden.com> & Ramindu Deshapriya <ramindu@rdeshapriya.com>
+
+Authors: Dan Marsden <dan@danmarsden.com> & Ramindu Deshapriya <ramindu@rdeshapriya.com>
+
 Copyright 2015 Dan Marsden http://danmarsden.com & Ramindu Deshapriya http://rdeshapriya.com
 
 ### Quick Install
