@@ -64,4 +64,14 @@ class plagiarism_moorsp_observer {
         require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
         moorsp_handle_event($event->get_data());
     }
+    /**
+     * Observer function to handle the assessable_submitted event in mod_assign.
+     * @param \mod_assign\event\assessable_submitted $event
+     */
+    public static function assignsubmission_submitted(
+        \mod_assign\event\assessable_submitted $event) {
+        global $CFG;
+        require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
+        moorsp_handle_event($event->get_data());
+    }
 }
