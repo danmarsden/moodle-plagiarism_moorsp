@@ -49,27 +49,28 @@ if (($data = $mform->get_data()) && confirm_sesskey()) {
     if (!isset($data->moorsp_use)) {
         $data->moorsp_use = 0;
     }
+    if (!isset($data->moorsp_enable_mod_assign)) {
+        $data->moorsp_enable_mod_assign = 0;
+    }
+    if (!isset($data->moorsp_enable_mod_assignment)) {
+        $data->moorsp_enable_mod_assignment = 0;
+    }
+    if (!isset($data->moorsp_enable_mod_forum)) {
+        $data->moorsp_enable_mod_forum = 0;
+    }
+    if (!isset($data->moorsp_enable_mod_workshop)) {
+        $data->moorsp_enable_mod_workshop = 0;
+    }
     foreach ($data as $field=>$value) {
         if (strpos($field, 'moorsp')===0) {
-            if ($tiiconfigfield = $DB->get_record('config_plugins', array('name'=>$field, 'plugin'=>'plagiarism'))) {
-                $tiiconfigfield->value = $value;
-                if (! $DB->update_record('config_plugins', $tiiconfigfield)) {
-                    error("errorupdating");
-                }
-            } else {
-                $tiiconfigfield = new stdClass();
-                $tiiconfigfield->value = $value;
-                $tiiconfigfield->plugin = 'plagiarism';
-                $tiiconfigfield->name = $field;
-                if (! $DB->insert_record('config_plugins', $tiiconfigfield)) {
-                    error("errorinserting");
-                }
-            }
+            $plugintype = $field == 'moorsp_use' ? 'plagiarism' : 'plagiarism_moorsp';
+            set_config($field, $value, $plugintype);
         }
     }
+    cache_helper::invalidate_by_definition('core', 'config', array(), 'plagiarism_moorsp');
     echo $OUTPUT->notification(get_string('savedconfigsuccess', 'plagiarism_moorsp'), 'notifysuccess');
 }
-$plagiarismsettings = (array)get_config('plagiarism');
+$plagiarismsettings = array_merge((array)get_config('plagiarism'), (array)get_config('plagiarism_moorsp'));
 $mform->set_data($plagiarismsettings);
     
 echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');

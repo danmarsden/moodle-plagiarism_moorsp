@@ -15,57 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Event handlers for the moorsp plagiarism plugin.
+ * Event observers for the moorsp plagiarism plugin.
  *
  * @package    plagiarism_moorsp
  * @copyright  2014 onwards Dan Marsden {@link http://danmarsden.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$handlers = array (
-
-    /*
-     * Event Handlers
+$observers = array (
+    /**
+     * Event observers
      */
-    'assessable_file_uploaded' => array (
-        'handlerfile'      => '/plagiarism/moorsp/lib.php',
-        'handlerfunction'  => 'moorsp_event_file_uploaded',
-        'schedule'         => 'cron'
+    array(
+        'eventname' => '\assignsubmission_file\event\assessable_uploaded',
+        'callback' => 'plagiarism_moorsp_observer::assignsubmission_file_uploaded'
     ),
-    'assessable_files_done' => array (
-        'handlerfile'      => '/plagiarism/moorsp/lib.php',
-        'handlerfunction'  => 'moorsp_event_files_done',
-        'schedule'         => 'cron'
+    array(
+        'eventname' => '\mod_workshop\event\assessable_uploaded',
+        'callback' => 'plagiarism_moorsp_observer::workshop_file_uploaded'
     ),
-    'assessable_content_uploaded' => array (
-        'handlerfile'      => '/plagiarism/moorsp/lib.php',
-        'handlerfunction'  => 'moorsp_event_content_uploaded',
-        'schedule'         => 'cron'
+    array(
+        'eventname' => '\mod_forum\event\assessable_uploaded',
+        'callback' => 'plagiarism_moorsp_observer::forum_file_uploaded'
     ),
-    'assessable_content_done' => array (
-        'handlerfile'      => '/plagiarism/moorsp/lib.php',
-        'handlerfunction'  => 'moorsp_event_content_done',
-        'schedule'         => 'cron'
+    array(
+        'eventname' => '\assignsubmission_onlinetext\event\assessable_uploaded',
+        'callback' => 'plagiarism_moorsp_observer::assignsubmission_onlinetext_uploaded'
     ),
-    'mod_created' => array (
-        'handlerfile'      => '/plagiarism/moorsp/lib.php',
-        'handlerfunction'  => 'moorsp_event_mod_created',
-        'schedule'         => 'cron'
-    ),
-    'mod_updated' => array (
-        'handlerfile'      => '/plagiarism/moorsp/lib.php',
-        'handlerfunction'  => 'moorsp_event_mod_updated',
-        'schedule'         => 'cron'
-    ),
-    'mod_deleted' => array (
-        'handlerfile'      => '/plagiarism/moorsp/lib.php',
-        'handlerfunction'  => 'moorsp_event_mod_deleted',
-        'schedule'         => 'cron'
-    ),
-    'assessable_submitted' => array (
-        'handlerfile'      => '/plagiarism/moorsp/lib.php',
-        'handlerfunction'  => 'moorsp_event_assessable_submitted',
-        'schedule'         => 'cron'
-    ),
+    array(
+        'eventname' => '\mod_assign\event\assessable_submitted',
+        'callback' => 'plagiarism_moorsp_observer::assignsubmission_submitted'
+    )
 
 );
