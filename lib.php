@@ -23,10 +23,10 @@
  */
 
 if (!defined('MOODLE_INTERNAL')) {
-    die('Direct access to this script is forbidden.');    ///  It must be included from a Moodle page
+    die('Direct access to this script is forbidden.'); // It must be included from a Moodle page.
 }
 
-//get global class
+// Get global class.
 require_once($CFG->dirroot.'/plagiarism/lib.php');
 
 define('PLAGIARISM_MOORSP_DRAFTSUBMIT_IMMEDIATE', 0);
@@ -71,7 +71,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             return false;
         }
         if ($plagiarismvalues['use_moorsp']) {
-            // Moorsp is used for this cm
+            // Moorsp is used for this cm.
             $useforcm = true;
         }
 
@@ -81,14 +81,13 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         }
         return ($useforcm && $cmenabled);
     }
-     /**
-     * hook to allow plagiarism specific information to be displayed beside a submission 
+    /**
+     * hook to allow plagiarism specific information to be displayed beside a submission
      * @param array  $linkarraycontains all relevant information for the plugin to generate a link
      * @return string
-     * 
+     *
      */
     public function get_links($linkarray) {
-        //$userid, $file, $cmid, $course, $module
         global $OUTPUT;
         $cmid = $linkarray['cmid'];
         $userid = $linkarray['userid'];
@@ -110,7 +109,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         if (!$results) {
             return $output;
         }
-        //add link/information about this file to $output
+        // Add link/information about this file to $output.
         if ($results['analyzed'] == 0) {
             $output .= '<span class="plagiarismreport">'.
                 '<img src="'.$OUTPUT->pix_url('processing', 'plagiarism_moorsp') .
@@ -167,7 +166,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
         // If the user has permission to see result of all items in this course module.
         $viewreport = has_capability('plagiarism/moorsp:viewreport', $modulecontext)
             || $plagiarismvalues['moorsp_show_student_plagiarism_info'];
-        // If the file has already been analyzed, return those results
+        // If the file has already been analyzed, return those results.
         $storedfile = $DB->get_record_sql(
             "SELECT * FROM {plagiarism_moorsp_files}
                                  WHERE cm = ? AND userid = ? AND " .
@@ -191,7 +190,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
 
             $results['analyzed'] = 1;
             if (!empty($plagiarismfile)) {
-                // File is plagiarised based on file content hash
+                // File is plagiarised based on file content hash.
                 $updatefile->similarity = 1;
                 $results['score'] = 1;
             } else {
@@ -216,7 +215,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @return bool Whether the store function was successful
      */
     public function handle_onlinetext($cmid, $userid, $content, $overflowenabled = false) {
-        // Dirty hack, Moodle adds no-overflow div to online text submissions
+        // Dirty hack, Moodle adds no-overflow div to online text submissions.
         if ($overflowenabled) {
             $filehash = md5(trim('<div class="no-overflow">'.$content.'</div>'));
         } else {
@@ -247,7 +246,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             "identifier = ?",
             array($cmid, $userid, $filehash));
         if (!empty($plagiarismfile)) {
-            // File is already there, return true
+            // File is already there, return true.
             return true;
         } else {
             $plagiarismfile = new stdClass();
@@ -309,7 +308,7 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             PLAGIARISM_MOORSP_DRAFTSUBMIT_FINAL => get_string("submitonfinal", "plagiarism_moorsp")
         );
         $plagiarismsettings = array_merge((array)get_config('plagiarism'), (array)get_config('plagiarism_moorsp'));
-        if(!$plagiarismsettings) {
+        if (!$plagiarismsettings) {
             return;
         }
         $cmid = optional_param('update', 0, PARAM_INT); // Get cm as $this->_cm is not available here.
@@ -363,7 +362,6 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
             }
         }
 
-
     }
 
     /**
@@ -395,24 +393,17 @@ class plagiarism_plugin_moorsp extends plagiarism_plugin {
      * @param object $cm - full cm object
      */
     public function update_status($course, $cm) {
-        //called at top of submissions/grading pages - allows printing of admin style links or updating status
+        // Called at top of submissions/grading pages - allows printing of admin style links or updating status.
+        // TODO: add something here and add a behat test for it.
     }
 
-    /**
-     * called by admin/cron.php 
-     *
-     */
-    public function cron() {
-        //do any scheduled task stuff
-    }
     /**
      * Function which returns an array of all the module instance settings.
      *
      * @return array
      *
      */
-    public function config_options()
-    {
+    public function config_options() {
         return array('use_moorsp', 'moorsp_show_student_plagiarism_info',
             'moorsp_draft_submit');
     }
@@ -435,7 +426,7 @@ function moorsp_handle_event($eventdata) {
         return false;
     }
     $cmid = $eventdata['contextinstanceid'];
-    // Normal scenario - this is an upload event with one or more attached files
+    // Normal scenario - this is an upload event with one or more attached files.
     if (!empty($eventdata['other']['pathnamehashes'])) {
         foreach ($eventdata['other']['pathnamehashes'] as $hash) {
             $fs = get_file_storage();
@@ -483,7 +474,7 @@ function moorsp_handle_event($eventdata) {
                                 break;
                             }
                             if ($i >= $sanitycheckusers) {
-                                // don't cause a massive loop here and break at a sensible limit.
+                                // Don't cause a massive loop here and break at a sensible limit.
                                 break;
                             }
                             $i++;
@@ -499,7 +490,7 @@ function moorsp_handle_event($eventdata) {
         if ($eventdata['component'] == 'assignsubmission_onlinetext') {
             $overflowenabled = true;
         }
-        // Online text submission scenario
+        // Online text submission scenario.
         return $moorsp->handle_onlinetext($cmid, $eventdata['userid'],
             $eventdata['other']['content'], $overflowenabled);
     }

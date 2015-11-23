@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
-* Event observers used in Moorsp Plagiarism plugin.
-*
-* @copyright  2015 Ramindu Deshapriya <rasade88@gmail.com>
-* @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ * Event observers used in Moorsp Plagiarism plugin.
+ *
+ * @copyright  2015 Ramindu Deshapriya <rasade88@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
