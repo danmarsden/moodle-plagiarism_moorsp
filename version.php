@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version =  2014040800;
-$plugin->requires = 2010042803;
-$plugin->cron     = 0;
+$plugin->version   = 2014040800;
+$plugin->requires  = 2010042803;
+$plugin->cron      = 0;
 $plugin->component = 'plagiarism_moorsp';
 $plugin->maturity  = MATURITY_ALPHA;
 $plugin->release   = '0.1';

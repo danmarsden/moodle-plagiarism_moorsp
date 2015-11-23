@@ -61,8 +61,8 @@ if (($data = $mform->get_data()) && confirm_sesskey()) {
     if (!isset($data->moorsp_enable_mod_workshop)) {
         $data->moorsp_enable_mod_workshop = 0;
     }
-    foreach ($data as $field=>$value) {
-        if (strpos($field, 'moorsp')===0) {
+    foreach ($data as $field => $value) {
+        if (strpos($field, 'moorsp') === 0) {
             $plugintype = $field == 'moorsp_use' ? 'plagiarism' : 'plagiarism_moorsp';
             set_config($field, $value, $plugintype);
         }
@@ -72,7 +72,7 @@ if (($data = $mform->get_data()) && confirm_sesskey()) {
 }
 $plagiarismsettings = array_merge((array)get_config('plagiarism'), (array)get_config('plagiarism_moorsp'));
 $mform->set_data($plagiarismsettings);
-    
+
 echo $OUTPUT->box_start('generalbox boxaligncenter', 'intro');
 $mform->display();
 echo $OUTPUT->box_end();

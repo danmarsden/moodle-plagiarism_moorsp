@@ -27,7 +27,7 @@ global $CFG;
 require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
 
 define('TEST_CONTENTHASH', '259e36493fc60699602b3e5d3593030022a0b29c');
-define('MOORSP_STUDENT_DISCLOSURE', get_string('studentdisclosure','plagiarism_moorsp'));
+define('MOORSP_STUDENT_DISCLOSURE', get_string('studentdisclosure', 'plagiarism_moorsp'));
 
 class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
     protected $eventdata = array();
@@ -38,9 +38,9 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
     /**
      * Function to set up a course and assignment for the tests.
      */
-    protected function setUp(){
+    protected function setUp() {
         global $DB, $USER;
-        $tomorrow = time() + 24*60*60;
+        $tomorrow = time() + 24 * 60 * 60;
         $this->setAdminUser();
         // Need to enable Moorsp first
         $setting = new stdClass();
@@ -67,7 +67,7 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
         // Create a course
         $this->course = $this->getDataGenerator()->create_course();
         $this->getDataGenerator()->enrol_user($USER->id, $this->course->id);
-        $this->assignment = $this->create_assign_instance($this->course, array('duedate'=>$tomorrow));
+        $this->assignment = $this->create_assign_instance($this->course, array('duedate' => $tomorrow));
         // Enable Moorsp for this context module
         $plagiarismenabledcm = new stdClass();
         $plagiarismenabledcm->cm = $this->assignment->instanceid;
@@ -112,7 +112,6 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
                                     )
             ),
             'timecreated' => time()
-
 
         );
         $result = moorsp_handle_event($eventdata);
