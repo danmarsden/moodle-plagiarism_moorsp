@@ -33,7 +33,7 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
     protected $eventdata = array();
     protected $course = null;
     protected $assignment = null;
-    protected $config_options = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
+    protected $configOptions = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
         'moorsp_draft_submit');
     /**
      * Function to set up a course and assignment for the tests.
@@ -42,7 +42,7 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
         global $DB, $USER;
         $tomorrow = time() + 24 * 60 * 60;
         $this->setAdminUser();
-        // Need to enable Moorsp first
+        // Need to enable Moorsp first.
         $setting = new stdClass();
         $setting->plugin = 'plagiarism';
         $setting->name = 'moorsp_use';
@@ -64,11 +64,11 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
         $setting->name = 'moorsp_enable_mod_workshop';
         $setting->value = 1;
         $DB->insert_record('config_plugins', $setting);
-        // Create a course
+        // Create a course.
         $this->course = $this->getDataGenerator()->create_course();
         $this->getDataGenerator()->enrol_user($USER->id, $this->course->id);
         $this->assignment = $this->create_assign_instance($this->course, array('duedate' => $tomorrow));
-        // Enable Moorsp for this context module
+        // Enable Moorsp for this context module.
         $plagiarismenabledcm = new stdClass();
         $plagiarismenabledcm->cm = $this->assignment->instanceid;
         $plagiarismenabledcm->name = 'use_moorsp';
@@ -80,7 +80,7 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
         global $DB, $USER;
         $fs = get_file_storage();
         $this->resetAfterTest(true);
-        // Prepare file record object
+        // Prepare file record object.
         $fileinfo = array(
             'contextid' => $this->assignment->id,
             'component' => 'assignsubmission_file',

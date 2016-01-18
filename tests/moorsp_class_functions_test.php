@@ -26,22 +26,22 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/plagiarism/moorsp/lib.php');
 
-define('MOORSP_STUDENT_DISCLOSURE', get_string('studentdisclosure','plagiarism_moorsp'));
+define('MOORSP_STUDENT_DISCLOSURE', get_string('studentdisclosure', 'plagiarism_moorsp'));
 
 class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
     protected $course = null;
     protected $assignment = null;
-    protected $config_options = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
+    protected $configOptions = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
 'moorsp_draft_submit');
 
     /**
      * Function to set up a course and assignment for the tests.
      */
-    protected function setUp(){
+    protected function setUp() {
         global $DB;
-        $tomorrow = time() + 24*60*60;
+        $tomorrow = time() + 24 * 60 * 60;
         $this->setAdminUser();
-        // Need to enable Moorsp first
+        // Need to enable Moorsp first.
         $setting = new stdClass();
         $setting->plugin = 'plagiarism';
         $setting->name = 'moorsp_use';
@@ -63,10 +63,10 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         $setting->name = 'moorsp_enable_mod_workshop';
         $setting->value = 1;
         $DB->insert_record('config_plugins', $setting);
-        // Create a course
+        // Create a course.
         $this->course = $this->getDataGenerator()->create_course();
-        $this->assignment = $this->create_assign_instance($this->course, array('duedate'=>$tomorrow));
-        // Enable Moorsp for this context module
+        $this->assignment = $this->create_assign_instance($this->course, array('duedate' => $tomorrow));
+        // Enable Moorsp for this context module.
         $plagiarismenabledcm = new stdClass();
         $plagiarismenabledcm->cm = $this->assignment->instanceid;
         $plagiarismenabledcm->name = 'use_moorsp';
@@ -102,7 +102,8 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         global $DB;
         $this->resetAfterTest(true);
         $moorsp = new plagiarism_plugin_moorsp();
-        $plagiarismsettings = $DB->get_records_menu('plagiarism_moorsp_config', array('cm' => $this->assignment->instanceid), '', 'name, value');
+        $plagiarismsettings = $DB->get_records_menu('plagiarism_moorsp_config',
+            array('cm' => $this->assignment->instanceid), '', 'name, value');
         $expected = $DB->record_exists('course_modules', array('id' => $this->assignment->instanceid))
             && $plagiarismsettings['use_moorsp'];
         $this->assertEquals($expected, $moorsp->is_moorsp_used($this->assignment->instanceid));
@@ -114,7 +115,7 @@ class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
         $file = new stdClass();
         $file->filename = "Test file";
         $file->identifier = md5("Test file content");
-        $result = $moorsp->update_plagiarism_file($this->assignment->instanceid,$USER->id,$file);
+        $result = $moorsp->update_plagiarism_file($this->assignment->instanceid, $USER->id, $file);
         $this->assertTrue($result);
         $plagiarismfile = $DB->get_record_sql(
             "SELECT * FROM {plagiarism_moorsp_files}
