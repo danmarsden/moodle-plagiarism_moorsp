@@ -23,9 +23,7 @@
  */
 
 $observers = array (
-    /**
-     * Event observers
-     */
+    // Event observers.
     array(
         'eventname' => '\assignsubmission_file\event\assessable_uploaded',
         'callback' => 'plagiarism_moorsp_observer::assignsubmission_file_uploaded'
