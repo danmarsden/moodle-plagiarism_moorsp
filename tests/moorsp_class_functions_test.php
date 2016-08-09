@@ -31,7 +31,7 @@ define('MOORSP_STUDENT_DISCLOSURE', get_string('studentdisclosure', 'plagiarism_
 class plagiarism_moorsp_class_functions_testcase extends advanced_testcase {
     protected $course = null;
     protected $assignment = null;
-    protected $configOptions = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
+    protected $configoptions = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
 'moorsp_draft_submit');
 
     /**

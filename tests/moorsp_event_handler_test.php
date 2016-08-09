@@ -33,7 +33,7 @@ class plagiarism_moorsp_event_handler_testcase extends advanced_testcase {
     protected $eventdata = array();
     protected $course = null;
     protected $assignment = null;
-    protected $configOptions = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
+    protected $configoptions = array('use_moorsp', 'moorsp_show_student_plagiarism_info',
         'moorsp_draft_submit');
     /**
      * Function to set up a course and assignment for the tests.
